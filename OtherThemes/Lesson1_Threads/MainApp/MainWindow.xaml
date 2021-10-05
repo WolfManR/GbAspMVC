@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <StackPanel Grid.Column="0">
+            <RadioButton Name="BtnFibonacci" Content="Fibonacci" GroupName="NavMenu" Checked="BtnFibonacci_OnChecked"/>
+            <RadioButton Name="BtnList" Content="List" GroupName="NavMenu" Checked="BtnList_OnChecked"/>
+            <RadioButton Name="BtnApi" Content="API" GroupName="NavMenu" Checked="BtnApi_OnChecked"/>
+        </StackPanel>
+
+        <Frame Grid.Column="1" x:Name="Navigator" NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>
