@@ -27,7 +27,8 @@
             <TextBox Name="BoxDelay" KeyDown="Delay_OnKeyDown"/>
             <TextBlock Text="Press 'Enter' to apply delay" FontSize="10" Foreground="#A8A8A8" FontWeight="DemiBold"/>
 
-            <Button Name="BrnStart" Content="Start" Margin="0,10,0,0" Click="BrnStart_OnClick"/>
+            <Button Name="BtnStart" Content="Start" Margin="0,10,0,0" Click="BtnStart_OnClick"/>
+            <Button Name="BtnStop" Content="Stop" Margin="0,10,0,0" Click="BtnStop_OnClick"/>
         </StackPanel>
     </Grid>
 </Page>
