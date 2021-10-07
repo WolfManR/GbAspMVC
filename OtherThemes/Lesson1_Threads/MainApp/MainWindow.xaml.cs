@@ -13,17 +13,11 @@ namespace MainApp
         }
 
         private readonly FibonacciPage _fibonacciPage = new();
-        private readonly ListPage _listPage = new();
         private readonly APIPage _apiPage = new();
 
         private void BtnFibonacci_OnChecked(object sender, RoutedEventArgs e)
         {
             NavigateTo(_fibonacciPage);
-        }
-
-        private void BtnList_OnChecked(object sender, RoutedEventArgs e)
-        {
-            NavigateTo(_listPage);
         }
 
         private void BtnApi_OnChecked(object sender, RoutedEventArgs e)
