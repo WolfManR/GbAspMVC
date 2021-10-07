@@ -27,8 +27,15 @@ namespace MainApp.Pages
         {
             Output.Text = string.Empty;
             if (!int.TryParse(BoxNumber.Text, out var number) && number < 0) return;
-            Thread fibonacciThread = new Thread(() => PositiveFibonacci(number));
-            fibonacciThread.Start();
+
+            Thread fibonacciThread = new(obj =>
+            {
+                if (obj is int fibonacciIndex)
+                {
+                    PositiveFibonacci(fibonacciIndex);
+                }
+            });
+            fibonacciThread.Start(number);
         }
 
         private void PositiveFibonacci(int number)
@@ -44,7 +51,6 @@ namespace MainApp.Pages
                     num1 = num2;
                     num2 = fibonacci;
                 }
-
 
                 Display(fibonacci);
                 Thread.Sleep(Delay);
