@@ -8,11 +8,11 @@ namespace ListWrapperTest
         private static readonly Random Random = new(648);
 
         private const int AddTimes = 100;
-        private const int Times = 10;
+        private const int RemoveTimes = 100;
 
         private const int PrintDelay = 1000;
-        private const int AddDelay = 1000;
-        private const int RemoveDelay = 1000;
+        private const int AddDelay = 100;
+        private const int RemoveDelay = 100;
 
         static void Main(string[] args)
         {
@@ -21,9 +21,14 @@ namespace ListWrapperTest
             for (var i = 0; i < 5; i++)
             {
                 LaunchThread(new DTO(AddTimes, AddDelay, wrapper), ThreadType.increment, i);
-                LaunchThread(new DTO(Times, RemoveDelay, wrapper), ThreadType.decrement, i);
-                LaunchThread(new DTO(Times, PrintDelay, wrapper), ThreadType.print, i);
+                LaunchThread(new DTO(RemoveTimes, RemoveDelay, wrapper), ThreadType.decrement, i);
+                LaunchThread(new DTO(1, PrintDelay, wrapper), ThreadType.print, i);
             }
+
+            Console.WriteLine("waiting...");
+            Thread.Sleep(4000);
+            LaunchThread(new DTO(1, PrintDelay, wrapper), ThreadType.print, 1);
+            Console.WriteLine("Main Thread - Work done");
         }
 
         private static void LaunchThread(DTO launchDTO, ThreadType threadType, int number)
@@ -82,9 +87,10 @@ namespace ListWrapperTest
 
         private static void Print(int maxTimes, int delay, ListWrapper<int> wrapper)
         {
+            (string threadName, int threadId) = (Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId);
             for (var i = 0; i < maxTimes; i++)
             {
-                Console.WriteLine(string.Join(", ", wrapper.GetData()));
+                Console.WriteLine($"{threadName} Id : {threadId} - List Values: {string.Join(", ", wrapper.GetData())}");
                 Thread.Sleep(delay);
             }
         }

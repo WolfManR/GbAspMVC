@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace ListWrapperTest
 {
@@ -45,7 +46,7 @@ namespace ListWrapperTest
         {
             lock (_getLock)
             {
-                return _list[^1];
+                return _list.Count > 0 ? _list[^1] : default;
             }
         }
     }
