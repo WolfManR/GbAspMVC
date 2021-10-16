@@ -1,26 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MiniThreadPoolProject
 {
     internal class Program
     {
-        static void Main()
+        private static void Main()
         {
             using (IMyThreadPool threadPool = new MyThreadPool(4, 6))
             {
-                for (var i = 0; i < 8; i++)
-                {
-                    threadPool.QueueTask(() =>
-                    {
-                        Thread.Sleep(4000);
-                        Console.WriteLine($"Hello from thread {Thread.CurrentThread.ManagedThreadId} with name {Thread.CurrentThread.Name}");
-                    });
-                }
+                Thread parallel = new Thread(DoWork) { IsBackground = true, Name = "Background assigner" };
+                parallel.Start(new ThreadDTO() { CountOfWorks = 8, ThreadPool = threadPool });
 
-                Thread.Sleep(10000);
+                AssignWorks(threadPool, 5);
+
+                Thread.Sleep(20000);
                 Console.WriteLine($"Count of threads in thread pool: {threadPool.Count}");
 
                 Console.WriteLine("Start disposing thread pool");
@@ -28,14 +23,39 @@ namespace MiniThreadPoolProject
 
             Console.WriteLine("Thread pool must be disposed");
         }
+
+        private static void DoWork(object arg)
+        {
+            if (arg is not ThreadDTO dto) return;
+            AssignWorks(dto.ThreadPool, dto.CountOfWorks);
+        }
+
+        private static void AssignWorks(IMyThreadPool threadPool, int countOfWorks = 8)
+        {
+            for (var i = 0; i < countOfWorks; i++)
+            {
+                threadPool.QueueTask(() =>
+                {
+                    Thread.Sleep(4000);
+                    Console.WriteLine($"Hello from thread {Thread.CurrentThread.ManagedThreadId} with name {Thread.CurrentThread.Name}");
+                });
+            }
+        }
+
+        private readonly struct ThreadDTO
+        {
+            public IMyThreadPool ThreadPool { get; init; }
+            public int CountOfWorks { get; init; }
+        }
     }
+
 
     public class MyThreadPool : IMyThreadPool
     {
-        private volatile Thread[] _threads;
+        private Thread[] _threads;
         private readonly ConcurrentQueue<Worker> _tasks;
         private readonly object _lock = new();
-        private int _maxCountOfThreads;
+        private readonly int _maxCountOfThreads;
 
         public MyThreadPool(int countOfThreads = 2, int maxCountOfThreads = 2)
         {
@@ -74,17 +94,18 @@ namespace MiniThreadPoolProject
             }
 
             Thread.Sleep(1);
-            if(worker.Status is WorkerStatus.Handled or WorkerStatus.Executing) return;
+            if (worker.Status is WorkerStatus.Handled or WorkerStatus.Executing) return;
 
             AppendBackgroundThread();
         }
 
         private void AppendBackgroundThread()
         {
-            if(_threads.Length == _maxCountOfThreads) return;
+            if (_threads.Length == _maxCountOfThreads) return;
 
             lock (_lock)
             {
+                if (_threads.Length == _maxCountOfThreads) return;
                 var temp = new Thread[_threads.Length + 1];
                 Array.Copy(_threads, temp, _threads.Length);
                 var newThread = new Thread(Consume) { IsBackground = true, Name = $"My Thread Pool thread No{temp.Length - 1}" };
@@ -106,7 +127,7 @@ namespace MiniThreadPoolProject
                         Monitor.Wait(_lock);
                         if (_isDisposed || _isDisposing) return;
                     }
-                    
+
                     if (!_tasks.TryDequeue(out worker)) continue;
                 }
                 if (_isDisposed || _isDisposing) return;
