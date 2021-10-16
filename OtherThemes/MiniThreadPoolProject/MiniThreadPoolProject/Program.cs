@@ -7,11 +7,11 @@ namespace MiniThreadPoolProject
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            using (IMyThreadPool threadPool = new MyThreadPool(4))
+            using (IMyThreadPool threadPool = new MyThreadPool(4, 6))
             {
-                for (var i = 0; i < 5; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     threadPool.QueueTask(() =>
                     {
@@ -21,6 +21,8 @@ namespace MiniThreadPoolProject
                 }
 
                 Thread.Sleep(10000);
+                Console.WriteLine($"Count of threads in thread pool: {threadPool.Count}");
+
                 Console.WriteLine("Start disposing thread pool");
             }
 
@@ -31,7 +33,7 @@ namespace MiniThreadPoolProject
     public class MyThreadPool : IMyThreadPool
     {
         private volatile Thread[] _threads;
-        private readonly ConcurrentQueue<Action> _tasks;
+        private readonly ConcurrentQueue<Worker> _tasks;
         private readonly object _lock = new();
         private int _maxCountOfThreads;
 
@@ -58,13 +60,37 @@ namespace MiniThreadPoolProject
             }
         }
 
+        public int Count => _threads.Length;
+
         public void QueueTask(Action task)
         {
+            Worker worker;
             lock (_lock)
             {
                 if (_isDisposed) return;
-                _tasks.Enqueue(task);
+                worker = new Worker(task);
+                _tasks.Enqueue(worker);
                 Monitor.PulseAll(_lock);
+            }
+
+            Thread.Sleep(1);
+            if(worker.Status is WorkerStatus.Handled or WorkerStatus.Executing) return;
+
+            AppendBackgroundThread();
+        }
+
+        private void AppendBackgroundThread()
+        {
+            if(_threads.Length == _maxCountOfThreads) return;
+
+            lock (_lock)
+            {
+                var temp = new Thread[_threads.Length + 1];
+                Array.Copy(_threads, temp, _threads.Length);
+                var newThread = new Thread(Consume) { IsBackground = true, Name = $"My Thread Pool thread No{temp.Length - 1}" };
+                newThread.Start();
+                temp[^1] = newThread;
+                Interlocked.Exchange(ref _threads, temp);
             }
         }
 
@@ -72,7 +98,7 @@ namespace MiniThreadPoolProject
         {
             while (true)
             {
-                Action task;
+                Worker worker;
                 lock (_lock)
                 {
                     while (_tasks.IsEmpty || _isDisposed || _isDisposing)
@@ -81,10 +107,13 @@ namespace MiniThreadPoolProject
                         if (_isDisposed || _isDisposing) return;
                     }
                     
-                    if (!_tasks.TryDequeue(out task)) continue;
+                    if (!_tasks.TryDequeue(out worker)) continue;
                 }
                 if (_isDisposed || _isDisposing) return;
-                task?.Invoke();
+
+                worker.SetAsExecuting();
+                worker.Task?.Invoke();
+                worker.SetAsHandled();
             }
         }
 
@@ -127,10 +156,31 @@ namespace MiniThreadPoolProject
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        private enum WorkerStatus { Waiting, Executing, Handled }
+
+        private class Worker
+        {
+            public Worker(Action task)
+            {
+                Task = task;
+                Status = WorkerStatus.Waiting;
+            }
+
+            public Action Task { get; }
+
+            public WorkerStatus Status { get; private set; }
+
+            public void SetAsHandled() => Status = WorkerStatus.Handled;
+
+            public void SetAsExecuting() => Status = WorkerStatus.Executing;
+        }
     }
 
     public interface IMyThreadPool : IDisposable
     {
+        int Count { get; }
+
         void QueueTask(Action task);
     }
 }
