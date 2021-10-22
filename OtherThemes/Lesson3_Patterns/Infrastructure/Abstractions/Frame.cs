@@ -1,6 +1,6 @@
-﻿namespace Infrastructure.Models
+﻿namespace Infrastructure.Abstractions
 {
-    public class Frame
+    public abstract class Frame
     {
         public string Material { get; set; }
         public int Width { get; set; }

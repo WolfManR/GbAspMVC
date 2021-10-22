@@ -1,6 +1,6 @@
-﻿namespace Infrastructure.Models
+﻿namespace Infrastructure.Abstractions
 {
-    public class Machine
+    public abstract class Machine
     {
         public Engine Engine { get; set; }
         public Frame Frame { get; set; }
