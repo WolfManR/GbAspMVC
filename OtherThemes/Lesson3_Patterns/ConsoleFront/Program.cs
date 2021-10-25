@@ -1,1 +1,3 @@
-﻿System.Console.WriteLine();
+﻿using static System.Console;
+
+WriteLine();
