@@ -41,10 +41,13 @@ namespace MiniThreadPoolProject
             MultiThreadWorkCallback callback;
             lock (_lock)
             {
-                if (_isDisposed) return null;
+                if (_isDisposed) throw new ObjectDisposedException(nameof(MyThreadPool), "Thread pool already disposed and can't handle more tasks");
+
                 callback = new MultiThreadWorkCallback();
                 var worker = new Worker(task, callback);
+
                 _tasks.Enqueue(worker);
+
                 Monitor.PulseAll(_lock);
             }
             
