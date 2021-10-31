@@ -4,6 +4,6 @@ namespace DataToParse
 {
     public interface ISerializer
     {
-        string Serialize<T>(IEnumerable<T> data);
+        string Serialize<T>(List<T> data);
     }
 }

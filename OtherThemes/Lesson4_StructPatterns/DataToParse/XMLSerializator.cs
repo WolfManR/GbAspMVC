@@ -7,11 +7,11 @@ namespace DataToParse
 {
     public class XMLSerializator : ISerializer
     {
-        public string Serialize<T>(IEnumerable<T> data)
+        public string Serialize<T>(List<T> data)
         {
             StringBuilder sb = new();
             TextWriter writer = new StringWriter(sb);
-            XmlSerializer ser = new(typeof(T));
+            XmlSerializer ser = new(data.GetType());
             ser.Serialize(writer, data);
             
             return sb.ToString();

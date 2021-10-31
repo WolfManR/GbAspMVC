@@ -5,7 +5,7 @@ namespace DataToParse
 {
     public class JsonSerializator : ISerializer
     {
-        public string Serialize<T>(IEnumerable<T> data)
+        public string Serialize<T>(List<T> data)
         {
             return JsonSerializer.Serialize(data);
         }

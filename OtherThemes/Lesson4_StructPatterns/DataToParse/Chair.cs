@@ -2,7 +2,7 @@
 
 namespace DataToParse
 {
-    class Chair
+    public class Chair
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
