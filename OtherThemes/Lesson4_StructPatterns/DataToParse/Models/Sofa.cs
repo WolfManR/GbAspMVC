@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DataToParse
+namespace DataToParse.Models
 {
     public class Sofa
     {

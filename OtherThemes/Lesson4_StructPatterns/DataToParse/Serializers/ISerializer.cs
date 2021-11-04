@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DataToParse
+namespace DataToParse.Serializers
 {
     public interface ISerializer
     {

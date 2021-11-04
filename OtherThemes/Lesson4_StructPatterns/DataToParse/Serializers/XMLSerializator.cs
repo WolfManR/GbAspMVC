@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace DataToParse
+namespace DataToParse.Serializers
 {
     public class XMLSerializator : ISerializer
     {

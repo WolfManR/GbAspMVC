@@ -1,4 +1,4 @@
-﻿namespace DataToParse
+﻿namespace DataToParse.Models
 {
     public class Size
     {

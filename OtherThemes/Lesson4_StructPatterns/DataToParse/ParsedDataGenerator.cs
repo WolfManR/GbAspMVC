@@ -1,4 +1,6 @@
 ﻿using Bogus;
+using DataToParse.Models;
+using DataToParse.Serializers;
 
 namespace DataToParse
 {
