@@ -2,7 +2,7 @@
 
 namespace ParseLoader
 {
-    class DataParser
+    internal class DataParser
     {
         public IEnumerable<Data> Parse(string data, ParseStrategy parseStrategy)
         {

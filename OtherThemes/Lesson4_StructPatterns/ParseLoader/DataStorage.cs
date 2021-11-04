@@ -2,9 +2,9 @@
 
 namespace ParseLoader
 {
-    class DataStorage
+    internal class DataStorage
     {
-        private List<Data> _storage = new();
+        private readonly List<Data> _storage = new();
 
         public void AddRange(IEnumerable<Data> data)
         {

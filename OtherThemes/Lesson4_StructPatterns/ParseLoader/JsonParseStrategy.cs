@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace ParseLoader
 {
-    class JsonParseStrategy : ParseStrategy
+    internal class JsonParseStrategy : ParseStrategy
     {
         public override IEnumerable<Data> Parse(string data)
         {
