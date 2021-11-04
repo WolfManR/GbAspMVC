@@ -25,12 +25,15 @@ namespace DataToParse
             c.Price = f.Random.Decimal(30, 60);
         });
 
-        Faker<Sofa> sofaFaker = new Faker<Sofa>().Rules((f, s) =>
+        private Faker<Sofa> sofaFaker = new Faker<Sofa>().Rules((f, s) =>
         {
             s.Id = f.Random.Guid();
             s.Name = f.Commerce.ProductName();
-            s.Height = f.Random.Double(10, 40);
-            s.Width = f.Random.Double(10, 40);
+            s.Size = new Size()
+            {
+                Height = f.Random.Double(10, 40),
+                Width = f.Random.Double(10, 40)
+            };
             s.Description = f.Lorem.Paragraph();
             s.Category = f.Commerce.Categories(4)[f.Random.Int(0, 3)];
             s.Price = f.Random.Decimal(30, 60);
