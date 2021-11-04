@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using ParseLoader.DataModels;
+using ParseLoader.ParseStategies;
 
 namespace ParseLoader
 {

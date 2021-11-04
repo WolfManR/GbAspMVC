@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ParseLoader
+namespace ParseLoader.Models
 {
     public class XMlProperty
     {

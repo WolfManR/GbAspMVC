@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
+using ParseLoader.DataModels;
 
-namespace ParseLoader
+namespace ParseLoader.ParseStategies
 {
     internal class JsonParseStrategy : ParseStrategy
     {

@@ -1,4 +1,4 @@
-﻿namespace ParseLoader
+﻿namespace ParseLoader.DataModels
 {
     public record Data
     {

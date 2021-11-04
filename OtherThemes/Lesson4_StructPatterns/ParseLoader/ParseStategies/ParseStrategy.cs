@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using ParseLoader.DataModels;
 
-namespace ParseLoader
+namespace ParseLoader.ParseStategies
 {
     internal abstract class ParseStrategy
     {

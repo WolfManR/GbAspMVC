@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ParseLoader
+namespace ParseLoader.Models
 {
     public class SearchDataHelper
     {

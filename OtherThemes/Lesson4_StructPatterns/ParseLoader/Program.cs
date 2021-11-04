@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using DataToParse.Serializers;
+using ParseLoader.DataModels;
+using ParseLoader.Models;
+using ParseLoader.ParseStategies;
 
 namespace ParseLoader
 {

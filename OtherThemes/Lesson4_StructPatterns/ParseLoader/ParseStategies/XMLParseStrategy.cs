@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
+using ParseLoader.DataModels;
+using ParseLoader.Models;
 
-namespace ParseLoader
+namespace ParseLoader.ParseStategies
 {
     internal class XMLParseStrategy : ParseStrategy
     {
