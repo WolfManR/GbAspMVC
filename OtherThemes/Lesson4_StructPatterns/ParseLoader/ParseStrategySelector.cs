@@ -1,20 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ParseLoader
 {
-    class ParseStrategySelector
+    internal class ParseStrategySelector
     {
+        private readonly List<(Predicate<string> CanHandle, ParseStrategy Parser)> _parsers;
+
+        public ParseStrategySelector(List<(Predicate<string> CanHandle, ParseStrategy Parser)> parsers)
+        {
+            _parsers = parsers;
+        }
+
         public ParseStrategy SelectParseStrategy(string data)
         {
             if (string.IsNullOrEmpty(data)) return null;
 
-            var span = data.Trim();
+            var dataToParse = data.Trim();
 
-            if((span.StartsWith('[') && span.EndsWith(']')) || (span.StartsWith('{') && span.EndsWith('}')))
-                return new JsonParseStrategy();
-
-            if(span.StartsWith("<?xml") && span.EndsWith(">"))
-                return new XMLParseStrategy();
+            foreach (var (canHandle, parser) in _parsers)
+            {
+                if (canHandle(dataToParse)) return parser;
+            }
 
             throw new NotSupportedException("Can't figure out what type of data");
         }

@@ -1,56 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace ParseLoader
 {
-    class XMLParseStrategy : ParseStrategy
+    internal class XMLParseStrategy : ParseStrategy
     {
+        public XMLParseStrategy(List<SearchDataHelper> searchDataHelpers, Dictionary<Type, Func<string, object>> converters)
+        {
+            SearchDataHelpers = searchDataHelpers;
+            Converters = converters;
+        }
+        private List<SearchDataHelper> SearchDataHelpers { get; }
+        private Dictionary<Type, Func<string, object>> Converters { get; }
+
         public override IEnumerable<Data> Parse(string data)
         {
             using var reader = new StringReader(data);
-            XmlDocument serializer = new XmlDocument();
-            serializer.Load(reader);
 
-            if (!serializer.HasChildNodes || serializer.ChildNodes.Count != 2) return Array.Empty<Data>();
-            var nodes = serializer.ChildNodes[1].ChildNodes;
+            using var xmlReader = XmlReader.Create(reader);
 
-            var result = new List<Data>();
+            var helper = FindHelper(xmlReader);
+            if (helper is null) yield break;
 
-            for (var i = 0; i < nodes.Count; i++)
+            do
             {
-                var node = nodes[i];
-                var properties = node.ChildNodes;
-                Data readData = new Data();
-                foreach (XmlNode property in properties)
+                XElement xElement = (XElement)XNode.ReadFrom(xmlReader);
+                Dictionary<string, object> propertiesValues = new Dictionary<string, object>();
+                foreach (var property in helper.Properties)
                 {
-                    if (property.Name == nameof(Data.Name))
-                    {
-                        readData.Name = property.InnerText;
-                    }
-
-                    if (property.Name == nameof(Data.Width) && double.TryParse(property.InnerText, NumberStyles.AllowDecimalPoint, new NumberFormatInfo(), out var width))
-                    {
-                        readData.Width = width;
-                    }
-
-                    if (property.Name == nameof(Data.Height) && double.TryParse(property.InnerText, NumberStyles.AllowDecimalPoint, new NumberFormatInfo(), out var height))
-                    {
-                        readData.Height = height;
-                    }
-
-                    if (property.Name == nameof(Data.Price) && decimal.TryParse(property.InnerText, NumberStyles.AllowDecimalPoint, new NumberFormatInfo(), out var price))
-                    {
-                        readData.Price = price;
-                    }
+                    var (success, value) = FindValue(xElement, property.PathParts);
+                    if (!success) continue;
+                    if (!Converters.TryGetValue(property.ValueType, out var converter)) continue;
+                    propertiesValues.Add(property.AssignPropertyName, converter.Invoke(value));
                 }
-                result.Add(readData);
-            }
 
-            return result;
+                Data temp = new Data()
+                {
+                    Name = propertiesValues[nameof(Data.Name)] as string,
+                    Width = propertiesValues[nameof(Data.Width)] is double width ? width : default,
+                    Height = propertiesValues[nameof(Data.Height)] is double height ? height : default,
+                    Price = propertiesValues[nameof(Data.Price)] is decimal price ? price : default
+                };
+
+                yield return temp;
+            } while (xmlReader.ReadToNextSibling(helper.DataName));
+
+            xmlReader.ReadEndElement();
+        }
+
+        private static (bool, string) FindValue(XElement searchElement, string[] pathParts)
+        {
+            foreach (var path in pathParts)
+            {
+                if (searchElement.Element(path) is not { } element) return (false, null);
+                searchElement = element;
+            }
+            return (true, searchElement.Value);
+        }
+
+        private SearchDataHelper FindHelper(XmlReader reader)
+        {
+            foreach (var helper in SearchDataHelpers)
+            {
+                if (reader.ReadToFollowing(helper.DataName))
+                {
+                    return helper;
+                }
+            }
+            return null;
         }
     }
 }

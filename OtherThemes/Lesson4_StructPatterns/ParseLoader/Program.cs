@@ -1,20 +1,46 @@
-﻿using System;
-using System.Text;
-using System.Xml.Schema;
-using System.Xml.Serialization;
+﻿using DataToParse;
 
-using DataToParse;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace ParseLoader
 {
     internal class Program
     {
-        
-        static void Main(string[] args)
+        private static List<SearchDataHelper> SearchDataHelpers { get; } = new()
         {
-            ParsedDataGenerator generator = new ();
+            new()
+            {
+                DataName = "Sofa",
+                Properties = new List<XMlProperty>()
+                {
+                    new(nameof(Data.Name), "Name", typeof(string)),
+                    new(nameof(Data.Width), "Size.Width", typeof(double)),
+                    new(nameof(Data.Height), "Size.Height", typeof(double)),
+                    new(nameof(Data.Price), "Price", typeof(decimal))
+                }
+            }
+        };
+
+        private static Dictionary<Type, Func<string, object>> Converters { get; } = new()
+        {
+            [typeof(string)] = s => s,
+            [typeof(double)] = s => double.TryParse(s, NumberStyles.AllowDecimalPoint, new NumberFormatInfo(), out var result) ? result : default(object),
+            [typeof(decimal)] = s => decimal.TryParse(s, NumberStyles.AllowDecimalPoint, new NumberFormatInfo(), out var result) ? result : default(object),
+        };
+
+        private static readonly List<(Predicate<string>, ParseStrategy)> Parsers = new()
+        {
+            (s => (s.StartsWith('[') && s.EndsWith(']')) || (s.StartsWith('{') && s.EndsWith('}')), new JsonParseStrategy()),
+            (s => s.StartsWith("<?xml") && s.EndsWith(">"), new XMLParseStrategy(SearchDataHelpers, Converters)),
+        };
+
+        private static void Main(string[] args)
+        {
+            ParsedDataGenerator generator = new();
             DataParser parser = new DataParser();
-            ParseStrategySelector strategySelector = new ParseStrategySelector();
+            ParseStrategySelector strategySelector = new ParseStrategySelector(Parsers);
             DataStorage storage = new DataStorage();
 
             ISerializer serializer = new JsonSerializator();
