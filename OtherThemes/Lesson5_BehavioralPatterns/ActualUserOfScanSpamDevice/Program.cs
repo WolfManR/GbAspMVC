@@ -1,13 +1,13 @@
-﻿using System;
-using System.Text;
-using ScannerSpammerDevice;
-using ScannerSpammerDevice_User;
+﻿using ScannerSpammerDevice_User;
 
-IScanSpamDeviceHandler deviceMonitor = new ScanSpamDeviceUsingHandler(new ScanSpamDevice());
-deviceMonitor
-    .ConfigureReader().SaveDataWith(new ConsoleSaveStrategy()).SetBufferSize(60)
-    .ConfigureLogger().UseConsole();
-deviceMonitor.ReadFile("File.txt");
+using System;
+using System.Text;
+
+IScanSpamDeviceHandler deviceMonitor = new ScanSpamDeviceUsingHandler(new ConsoleLogger());
+
+
+var consoleDataPublisher = new ConsoleSaveStrategy();
+deviceMonitor.ReadFile("File.txt", consoleDataPublisher);
 
 
 class ConsoleSaveStrategy : IDataSaveStrategy

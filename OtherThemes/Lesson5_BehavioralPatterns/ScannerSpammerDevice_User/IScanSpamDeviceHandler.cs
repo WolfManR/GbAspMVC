@@ -2,8 +2,6 @@
 {
     public interface IScanSpamDeviceHandler
     {
-        void ReadFile(string filePath);
-        IScanSpamDeviceReader ConfigureReader();
-        IScanSpamDeviceLogger ConfigureLogger();
+        void ReadFile(string filePath, IDataSaveStrategy saveStrategy);
     }
 }
