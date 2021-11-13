@@ -27,7 +27,7 @@ namespace ScannerSpammerDevice
 
         public void ReadFile(string filePath)
         {
-            _busyTimer ??= new Timer(_ => UpdateSelfState(), null, TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(8));
+            _busyTimer ??= new Timer(_ => UpdateSelfState(), null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1));
 
             IsReadFile = true;
 
@@ -40,6 +40,7 @@ namespace ScannerSpammerDevice
                 var fileLength = _reader.BaseStream.Length;
                 while (fileLength > lastIndex)
                 {
+                    Thread.Sleep(200); // For Debug
                     if (lastIndex + bufferSize > fileLength)
                     {
                         checked
