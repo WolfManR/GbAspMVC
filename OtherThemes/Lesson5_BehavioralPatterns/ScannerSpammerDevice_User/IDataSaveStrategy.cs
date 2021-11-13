@@ -2,6 +2,6 @@
 {
     public interface IDataSaveStrategy
     {
-        DataSaveResult SaveData(byte[] data);
+        DataSaveResult SaveData(object data);
     }
 }
