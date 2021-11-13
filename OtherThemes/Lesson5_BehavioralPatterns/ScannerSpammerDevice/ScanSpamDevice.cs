@@ -17,8 +17,8 @@ namespace ScannerSpammerDevice
             Id = Guid.NewGuid();
         }
 
-        public event EventHandler<ReadChunkArgs> OnDataReady;
-        public event EventHandler<ReadFileEndArgs> OnFileReadEnd;
+        public event Action<IScanSpamDevice, ReadChunkArgs> OnDataReady;
+        public event Action<IScanSpamDevice, ReadFileEndArgs> OnFileReadEnd;
         public double ProcessorLoad { get; private set; }
         public double MemoryLoad { get; private set; }
         public int BufferSize { get; set; } = 20;
