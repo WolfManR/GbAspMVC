@@ -1,7 +1,13 @@
-﻿namespace ScannerSpammerDevice_User
+﻿using ScannerSpammerDevice;
+
+namespace ScannerSpammerDevice_User
 {
     public interface IScanSpamDeviceHandler
     {
-        void ReadFile(string filePath, IDataSaveStrategy saveStrategy);
+        IDataSaveStrategy DataSaveStrategy { get; set; }
+
+        void ConnectDevice(IScanSpamDevice scanSpamDevice);
+        void DisconnectDevice(IScanSpamDevice scanSpamDevice);
+        void StartReadFile(IScanSpamDevice scanSpamDevice, string filePath);
     }
 }

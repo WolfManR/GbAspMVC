@@ -1,70 +1,138 @@
-﻿using System;
+﻿using ScannerSpammerDevice;
+
+using System;
 using System.Collections.Generic;
-using ScannerSpammerDevice;
 
 namespace ScannerSpammerDevice_User
 {
     public class ScanSpamDeviceUsingHandler : IScanSpamDeviceHandler
     {
-        private IScanSpamDevice _scanSpamDevice;
         private readonly ILogger _logger;
-        private IDataSaveStrategy _dataSaveStrategy;
+        private readonly IEnumerable<ParseHandler> _parseHandlers;
 
-        public static Dictionary<Guid, ReadingState> ReadingStates { get; }
-        public List<ParseHandler> ParseHandlers { get; }
+        private static Dictionary<Guid, ReadingState> ReadingStates { get; set; }
+        public IDataSaveStrategy DataSaveStrategy { get; set; }
 
-        public ScanSpamDeviceUsingHandler(ILogger logger)
+        public ScanSpamDeviceUsingHandler(ILogger logger, IEnumerable<ParseHandler> parseHandlers)
         {
             _logger = logger;
+            _parseHandlers = parseHandlers;
+            ReadingStates ??= new Dictionary<Guid, ReadingState>();
         }
 
         public void ConnectDevice(IScanSpamDevice scanSpamDevice)
         {
-            _scanSpamDevice = scanSpamDevice;
+            if (!ReadingStates.ContainsKey(scanSpamDevice.Id))
+            {
+                ReadingStates.TryAdd(scanSpamDevice.Id, new ReadingState());
+            }
+
+            scanSpamDevice.OnFileReadEnd += ScanSpamDeviceOnOnFileReadEnd;
+            scanSpamDevice.OnDataReady += ScanSpamDeviceOnOnDataReady;
         }
 
         public void DisconnectDevice(IScanSpamDevice scanSpamDevice)
         {
-            _scanSpamDevice = scanSpamDevice;
+            scanSpamDevice.OnFileReadEnd -= ScanSpamDeviceOnOnFileReadEnd;
+            scanSpamDevice.OnDataReady -= ScanSpamDeviceOnOnDataReady;
         }
 
-        public void ReadFile(string filePath, IDataSaveStrategy dataSaveStrategy)
+        public void StartReadFile(IScanSpamDevice scanSpamDevice, string filePath)
         {
-            _scanSpamDevice.OnFileReadEnd += ScanSpamDeviceOnOnFileReadEnd;
-            _scanSpamDevice.OnDataReady += ScanSpamDeviceOnOnDataReady;
-            _scanSpamDevice.ReadFile(filePath);
+            scanSpamDevice.ReadFile(filePath);
         }
 
-        private void ScanSpamDeviceOnOnFileReadEnd(object? sender, ReadFileEndArgs e)
+        private void ScanSpamDeviceOnOnFileReadEnd(IScanSpamDevice sender, ReadFileEndArgs e)
         {
-            if (sender is not IScanSpamDevice device) return;
-            device.OnDataReady -= ScanSpamDeviceOnOnDataReady;
-            device.OnFileReadEnd -= ScanSpamDeviceOnOnFileReadEnd;
             _logger?.Log($"File read end on path {e.FilePath}");
-        }
-
-        private void ScanSpamDeviceOnOnDataReady(object? sender, ReadChunkArgs e)
-        {
-            _dataSaveStrategy.SaveData(e.Chunk);
-
-            if (sender is IScanSpamDevice device)
+            if (ReadingStates.TryGetValue(sender.Id, out var state))
             {
-                _logger?.Log($"Device process load: {device.ProcessorLoad}, memory load: {device.MemoryLoad}");
+                state.Reset();
             }
         }
-    }
 
-    public class ReadingState
-    {
-        public Guid Id { get; }
-        public List<byte> ReadDataCache { get; }
+        private void ScanSpamDeviceOnOnDataReady(IScanSpamDevice sender, ReadChunkArgs e)
+        {
+            _logger?.Log($"Device process load: {sender.ProcessorLoad}, memory load: {sender.MemoryLoad}");
 
-    }
+            if (DataSaveStrategy is null)
+            {
+                DisconnectDevice(sender);
+                throw new InvalidOperationException("First set data save strategy");
+            }
 
-    public abstract class ParseHandler
-    {
-        public abstract int ExpectedDataSizeToParse { get; }
-        public abstract bool CanParse(byte[] data);
-        public abstract bool TryParse(byte[] data);
+            object parsedData = null;
+
+            if (ReadingStates.TryGetValue(sender.Id, out var state))
+            {
+                state.AppendData(e.Chunk);
+
+                if (state.AwaitingDataParseHandler is { } parseHandler)
+                {
+                    var dataToParse = state.PeekData();
+                    var (canParse, enoughDataToParse) = parseHandler.CanParse(dataToParse);
+                    if (canParse && enoughDataToParse)
+                    {
+                        parsedData = parseHandler.Parse(dataToParse, out var parsedDataSize);
+                        state.RemoveParsedData(parsedDataSize);
+                    }
+                }
+            }
+            else
+            {
+                state = new ReadingState();
+                if (!ReadingStates.TryAdd(sender.Id, state))
+                {
+                    state = ReadingStates[sender.Id];
+                }
+
+                state.AppendData(e.Chunk);
+                var dataToParse = e.Chunk;
+
+                foreach (var parseHandler in _parseHandlers)
+                {
+                    var (canParse, enoughDataToParse) = parseHandler.CanParse(dataToParse);
+                    if (!canParse) continue;
+                    if (enoughDataToParse)
+                    {
+                        parsedData = parseHandler.Parse(dataToParse, out var parsedDataSize);
+                        state.RemoveParsedData(parsedDataSize);
+                        break;
+                    }
+
+                    state.AwaitingDataParseHandler = parseHandler;
+                    break;
+                }
+
+            }
+
+            if (parsedData is not null) DataSaveStrategy.SaveData(parsedData);
+        }
+
+        private class ReadingState
+        {
+            private List<byte> ReadDataCache { get; } = new();
+            public ParseHandler AwaitingDataParseHandler { get; set; }
+
+            public void AppendData(byte[] data)
+            {
+                ReadDataCache.AddRange(data);
+            }
+
+            public void RemoveParsedData(int length)
+            {
+                ReadDataCache.RemoveRange(0, length);
+            }
+
+            public byte[] PeekData()
+            {
+                return ReadDataCache.ToArray();
+            }
+
+            public void Reset()
+            {
+                ReadDataCache.Clear();
+            }
+        }
     }
 }
