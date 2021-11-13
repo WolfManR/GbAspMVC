@@ -63,50 +63,43 @@ namespace ScannerSpammerDevice_User
 
             object parsedData = null;
 
-            if (ReadingStates.TryGetValue(sender.Id, out var state))
-            {
-                state.AppendData(e.Chunk);
+            ReadingState state = ReadingStates[sender.Id];
+            state.AppendData(e.Chunk);
+            var dataToParse = state.PeekData();
 
-                if (state.AwaitingDataParseHandler is { } parseHandler)
+            if (state.AwaitingDataParseHandler is { } parseHandler)
+            {
+                var (canParse, enoughDataToParse) = parseHandler.CanParse(dataToParse);
+                if (canParse && enoughDataToParse)
                 {
-                    var dataToParse = state.PeekData();
-                    var (canParse, enoughDataToParse) = parseHandler.CanParse(dataToParse);
-                    if (canParse && enoughDataToParse)
-                    {
-                        parsedData = parseHandler.Parse(dataToParse, out var parsedDataSize);
-                        state.RemoveParsedData(parsedDataSize);
-                    }
+                    parsedData = parseHandler.Parse(dataToParse, out var parsedDataSize);
+                    state.RemoveParsedData(parsedDataSize);
                 }
             }
             else
             {
-                state = new ReadingState();
-                if (!ReadingStates.TryAdd(sender.Id, state))
+                foreach (var handler in _parseHandlers)
                 {
-                    state = ReadingStates[sender.Id];
-                }
-
-                state.AppendData(e.Chunk);
-                var dataToParse = e.Chunk;
-
-                foreach (var parseHandler in _parseHandlers)
-                {
-                    var (canParse, enoughDataToParse) = parseHandler.CanParse(dataToParse);
+                    var (canParse, enoughDataToParse) = handler.CanParse(dataToParse);
                     if (!canParse) continue;
                     if (enoughDataToParse)
                     {
-                        parsedData = parseHandler.Parse(dataToParse, out var parsedDataSize);
+                        parsedData = handler.Parse(dataToParse, out var parsedDataSize);
                         state.RemoveParsedData(parsedDataSize);
                         break;
                     }
 
-                    state.AwaitingDataParseHandler = parseHandler;
+                    state.AwaitingDataParseHandler = handler;
                     break;
                 }
 
             }
 
-            if (parsedData is not null) DataSaveStrategy.SaveData(parsedData);
+            if (parsedData is not null)
+            {
+                state.AwaitingDataParseHandler = null;
+                DataSaveStrategy.SaveData(parsedData);
+            }
         }
 
         private class ReadingState
