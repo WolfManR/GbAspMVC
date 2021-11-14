@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ScannerSpammerDevice\ScannerSpammerDevice.csproj" />
     <ProjectReference Include="..\ScannerSpammerDevice_User\ScannerSpammerDevice_User.csproj" />
   </ItemGroup>
