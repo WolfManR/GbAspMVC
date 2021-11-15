@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerSpammerDevice", "Aut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScannerSpammerDevice_User", "Autofac\ScannerSpammerDevice_User\ScannerSpammerDevice_User.csproj", "{1620DCE1-F123-41C6-9C74-3DA48CB9D6D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp", "Calculator\CalculatorApp\CalculatorApp.csproj", "{6DF29085-276A-47F8-97DB-40CF6F27E41D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{1620DCE1-F123-41C6-9C74-3DA48CB9D6D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1620DCE1-F123-41C6-9C74-3DA48CB9D6D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1620DCE1-F123-41C6-9C74-3DA48CB9D6D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DF29085-276A-47F8-97DB-40CF6F27E41D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DF29085-276A-47F8-97DB-40CF6F27E41D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DF29085-276A-47F8-97DB-40CF6F27E41D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DF29085-276A-47F8-97DB-40CF6F27E41D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{93329A13-E6C7-49B8-B4DE-A0067ACE91D3} = {82DE65CC-37A4-47ED-8AA9-638F19542FC9}
 		{6EFE5F82-CADB-4F2F-81BB-37EA5747ACBE} = {82DE65CC-37A4-47ED-8AA9-638F19542FC9}
 		{1620DCE1-F123-41C6-9C74-3DA48CB9D6D7} = {82DE65CC-37A4-47ED-8AA9-638F19542FC9}
+		{6DF29085-276A-47F8-97DB-40CF6F27E41D} = {C1709886-CEF7-4857-A559-FE9758ED98E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {344F4E09-030D-4CBB-93C6-869C5B700FF7}
