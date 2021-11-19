@@ -5,12 +5,11 @@ namespace ActualUserOfScanSpamDevice.DataSaveStrategies
 {
     sealed class MongoDbConnection
     {
-        private const string ConnectionString = "mongodb://root:pass12345@localhost:27017";
         private readonly IMongoDatabase _database;
 
-        public MongoDbConnection()
+        public MongoDbConnection(string connectionString)
         {
-            var mongoClient = new MongoClient(ConnectionString);
+            var mongoClient = new MongoClient(connectionString);
             _database = mongoClient.GetDatabase("ScanSpam");
         }
 

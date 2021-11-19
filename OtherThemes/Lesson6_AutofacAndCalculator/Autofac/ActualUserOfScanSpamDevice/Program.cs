@@ -9,6 +9,7 @@ using ScannerSpammerDevice;
 
 //===File generation=========================================================================
 const string filePath = "File.txt";
+const string connectionString = "mongodb://root:pass12345@localhost:27017";
 
 string fileContent = @"Image Title=""Spaghetti"";Content=""h4i3p2kn43on34no34in34ni6j56i4j7j57o45j5l23l3l5j2lj636l34j6"";
 
@@ -32,15 +33,20 @@ var container = new ContainerBuilder().RegisterMany(builder =>
 {
     builder.RegisterType<ScanSpamDeviceUsingHandler>().As<IScanSpamDeviceHandler>();
     builder.RegisterType<ConsoleLogger>().As<ILogger>().SingleInstance();
-    builder.RegisterType<ConsoleSaveStrategy>().As<IDataSaveStrategy>();
     builder.RegisterType<ScanSpamDevice>().As<IScanSpamDevice>();
     builder.RegisterTypes(typeof(ImageParseHandler), typeof(NoteParseHandler)).As<ParseHandler>();
+
+    builder.RegisterType<ConsoleSaveStrategy>().As<IDataSaveStrategy>().Named<IDataSaveStrategy>("console");
+    builder.RegisterType<MongoDbSaveStrategy>().As<IDataSaveStrategy>().Named<IDataSaveStrategy>("mongo");
+
+    builder.RegisterType<MongoDbConnection>().WithParameter("connectionString", connectionString);
+    builder.RegisterTypes(typeof(ImageSaveOperation), typeof(NoteSaveOperation)).As<SaveOperation>();
 }).Build();
 
 
 IScanSpamDeviceHandler deviceMonitor = container.Resolve<IScanSpamDeviceHandler>();
 
-deviceMonitor.DataSaveStrategy = container.Resolve<IDataSaveStrategy>();
+deviceMonitor.DataSaveStrategy = container.ResolveNamed<IDataSaveStrategy>("mongo");
 
 var device = container.Resolve<IScanSpamDevice>();
 deviceMonitor.ConnectDevice(device);
