@@ -16,9 +16,9 @@ Repository repository = new Repository(dbConnection);
 
 //=======Import and parse raw data to database==============
 
-//await ImportAndParseDataToDatabase(repository);
+await ImportAndParseDataToDatabase(repository);
 
-// import data to report template
+//=======Import data to report template=====================
 
 await BuildReport(repository);
 
