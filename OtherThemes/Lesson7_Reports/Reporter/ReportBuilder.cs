@@ -1,32 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using FastReport;
+﻿using FastReport;
+
 using Reporter.Extensions;
+
+using System;
+using System.Collections;
 
 namespace Reporter
 {
-    public class ReportBuilder<TDataModel>
+    public class ReportBuilder
     {
         private string _reportFormFile;
-        private IReadOnlyCollection<TDataModel> _data;
+        private ReportDataBind _dataBind;
         private int? _startPageNumber;
 
-        private ReportBuilder(){}
-        public static ReportBuilder<TDataModel> Start() => new ReportBuilder<TDataModel>();
+        private ReportBuilder() { }
+        public static ReportBuilder Start() => new();
 
-        public ReportBuilder<TDataModel> UseForm(string reportFormFilePath)
+        public ReportBuilder UseForm(string reportFormFilePath)
         {
             _reportFormFile = reportFormFilePath;
             return this;
         }
 
-        public ReportBuilder<TDataModel> WithData(IReadOnlyCollection<TDataModel> data)
+        public ReportBuilder WithData(ReportDataBind dataBind)
         {
-            _data = data;
+            _dataBind = dataBind;
             return this;
         }
 
-        public ReportBuilder<TDataModel> SetPageNumber(int? startPageNumber)
+        public ReportBuilder SetPageNumber(int? startPageNumber)
         {
             _startPageNumber = startPageNumber;
             return this;
@@ -38,9 +40,9 @@ namespace Reporter
 
             report.Load(_reportFormFile);
 
-            report.SetDataToReportDataBind(_data, "Products", "Data1");
+            report.SetDataToReportDataBind(_dataBind.PreloadedData, _dataBind.DataSourceName, _dataBind.DataModuleName);
 
-            if(_startPageNumber is not null) report.InitialPageNumber = _startPageNumber.Value;
+            if (_startPageNumber is not null) report.InitialPageNumber = _startPageNumber.Value;
 
             if (!report.Prepare())
             {
@@ -48,6 +50,20 @@ namespace Reporter
             }
 
             return report;
+        }
+
+        public class ReportDataBind
+        {
+            public ReportDataBind(string dataSourceName, string dataModuleName, IEnumerable preloadedData)
+            {
+                DataSourceName = dataSourceName;
+                DataModuleName = dataModuleName;
+                PreloadedData = preloadedData;
+            }
+
+            public IEnumerable PreloadedData { get; }
+            public string DataSourceName { get; }
+            public string DataModuleName { get; }
         }
     }
 }

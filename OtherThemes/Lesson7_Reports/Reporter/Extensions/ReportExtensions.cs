@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using FastReport;
 using FastReport.Export.PdfSimple;
 
@@ -6,9 +7,9 @@ namespace Reporter.Extensions
 {
     public static class ReportExtensions
     {
-        public static Report SetDataToReportDataBind<TDataModel>(
+        public static Report SetDataToReportDataBind(
             this Report report,
-            IReadOnlyCollection<TDataModel> data,
+            IEnumerable data,
             string reportDataSourceName,
             string reportDataBindName)
         {

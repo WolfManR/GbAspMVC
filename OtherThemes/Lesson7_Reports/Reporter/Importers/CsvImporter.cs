@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using CsvHelper;
@@ -6,9 +7,12 @@ using CsvHelper.Configuration;
 
 namespace Reporter.Importers
 {
-    public class CsvImporter
+    public class CsvImporter : IDisposable
     {
         private readonly CsvConfiguration _csvConfiguration;
+        private TextReader textReaderStream;
+        private CsvReader csvReader;
+
 
         public CsvImporter()
         {
@@ -22,12 +26,18 @@ namespace Reporter.Importers
             where TImportModelMap : ClassMap
             where TImportModel : new()
         {
-            using var stream = File.OpenText(filePath);
-            using CsvReader reader = new(stream, _csvConfiguration);
+            textReaderStream = File.OpenText(filePath);
+            csvReader = new(textReaderStream, _csvConfiguration);
 
-            reader.Context.RegisterClassMap<TImportModelMap>();
+            csvReader.Context.RegisterClassMap<TImportModelMap>();
 
-            return reader.EnumerateRecordsAsync(new TImportModel());
+            return csvReader.EnumerateRecordsAsync(new TImportModel());
+        }
+
+        public void Dispose()
+        {
+            textReaderStream.Dispose();
+            csvReader.Dispose();
         }
     }
 }
