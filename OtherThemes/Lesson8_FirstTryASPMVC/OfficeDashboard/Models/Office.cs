@@ -7,6 +7,6 @@ namespace OfficeDashboard.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public ICollection<Employ> Employees { get; set; } = new HashSet<Employ>();
+        public ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
     }
 }
