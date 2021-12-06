@@ -26,6 +26,7 @@ namespace OfficeDashboard.Services
             var office = Offices.Generate();
             foreach (var employ in GenerateEmployees(countEmployees))
             {
+                employ.Office = office;
                 office.Employees.Add(employ);
             }
             return office;
