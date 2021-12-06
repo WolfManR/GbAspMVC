@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+
+using OfficeDashboard.Models;
+using OfficeDashboard.Services;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using OfficeDashboard.Models;
-using OfficeDashboard.Services;
 
 namespace OfficeDashboard.Pages
 {
@@ -23,38 +23,36 @@ namespace OfficeDashboard.Pages
             _officeRepository = officeRepository;
         }
 
-        [BindProperty] 
-        public string CurrentOffice { get; set; }
-        public List<Office> Offices;
-        
-        public List<Employee> Employees;
+        [BindProperty]
+        public Guid CurrentOfficeId { get; set; }
 
-        public void OnGet()
-        {
-            UpdatePageData();
-        }
+        public SelectList OfficesSelectList { get; set; }
+        public Office SelectedOffice { get; set; }
 
-        public SelectListItem[] GetOffices()
+        public void OnGet(Guid selectedOffice)
         {
-            return Offices.Select(o => new SelectListItem(o.Name, o.Id.ToString())).ToArray();
+            OfficesSelectList = new SelectList(_officeRepository.GetOffices(), "Id", "Name");
+            if (selectedOffice != Guid.Empty)
+            {
+                CurrentOfficeId = selectedOffice;
+                SelectedOffice = _officeRepository.GetOffice(selectedOffice);
+            }
         }
 
         public IActionResult OnPost()
         {
-            if(!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid) return Page();
 
-            if (Guid.TryParse(CurrentOffice, out var officeId))
-            {
-                Employees = _officeRepository.GetEmployees(officeId).ToList();
-                UpdatePageData();
-            }
-
-            return Page();
+            return RedirectToPage(new { selectedOffice = CurrentOfficeId });
         }
 
-        private void UpdatePageData()
+        public IActionResult OnPostDelete(Guid employeeId, Guid officeId)
         {
-            Offices = new List<Office>(_officeRepository.GetOffices());
+            if (!ModelState.IsValid) return Page();
+
+            _officeRepository.RemoveEmployee(employeeId);
+
+            return RedirectToPage(new { selectedOffice = officeId });
         }
     }
 }

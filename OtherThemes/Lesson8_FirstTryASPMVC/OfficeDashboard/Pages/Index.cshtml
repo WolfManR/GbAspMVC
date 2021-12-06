@@ -7,10 +7,11 @@
 <div class="container">
 	<form method="post" class="card p-3">
 		<label>Select office</label>
-		<select asp-for="CurrentOffice" asp-items="@Model.GetOffices()" onchange="this.form.submit()"></select>
+		<select asp-for="CurrentOfficeId" asp-items="Model.OfficesSelectList"></select>
+		<input type="submit" value="Confirm"/>
 	</form>
 	
-	@if (Model.Employees is not null)
+	@if (Model.SelectedOffice is not null)
 	{
 		<table class="table mt-5">
 			<thead>
@@ -20,13 +21,13 @@
 				<th scope="col">Delete</th>
 			</tr>
 			</thead>
-			@foreach (var employee in Model.Employees)
+			@foreach (var employee in Model.SelectedOffice.Employees)
 			{
 				<tr>
 					<td>@employee.Name</td>
 					<td>@employee.Surname</td>
 					<td>
-						<form method="post" asp-page-handler="Delete" asp-route-id="@employee.Id">
+						<form method="post" asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOffice.Id">
 							<button class="btn btn-danger">Delete</button>
 						</form>
 					</td>
