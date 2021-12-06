@@ -21,6 +21,7 @@ namespace OfficeDashboard.Services
         }
 
         public IEnumerable<Office> GetOffices() => OfficeList;
+        public Office GetOffice(Guid officeId) => OfficeList.FirstOrDefault(o=>o.Id == officeId);
         public IEnumerable<Employee> GetEmployees(Guid officeId) => OfficeList.FirstOrDefault(office => office.Id == officeId)?.Employees;
 
         public Guid RegisterEmployee(Guid officeId, Employee employee)
@@ -30,24 +31,21 @@ namespace OfficeDashboard.Services
                 var id = Guid.NewGuid();
                 employee.Id = id;
                 office.Employees.Add(employee);
+                employee.Office = office;
                 return id;
             }
 
             return Guid.Empty;
         }
 
-        public bool RemoveEmployee(Guid officeId, Guid employeeId)
+        public bool RemoveEmployee(Guid employeeId)
         {
-            if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
-            {
-                if (office.Employees.FirstOrDefault(e => e.Id == employeeId) is { } employee)
-                {
-                    office.Employees.Remove(employee);
-                    return true;
-                }
-            }
+            var employee = OfficeList.SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == employeeId);
+            if (employee is null) return false;
 
-            return false;
+            employee.Office.Employees.Remove(employee);
+            employee.Office = null;
+            return true;
         }
 
         public bool RemoveOffice(Guid officeId)
