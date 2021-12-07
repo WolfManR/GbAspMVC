@@ -54,5 +54,10 @@ namespace OfficeDashboard.Pages
 
             return RedirectToPage(new { selectedOffice = officeId });
         }
+
+        public IActionResult OnPostEdit(Guid employeeId)
+        {
+            return RedirectToPage("/Employees/Edit", new { id = employeeId });
+        }
     }
 }

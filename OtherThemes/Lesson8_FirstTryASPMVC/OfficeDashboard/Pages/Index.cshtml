@@ -27,8 +27,9 @@
 					<td>@employee.Name</td>
 					<td>@employee.Surname</td>
 					<td>
-						<form method="post" asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOffice.Id">
-							<button class="btn btn-danger">Delete</button>
+						<form method="post">
+							<button asp-page-handler="Edit" asp-route-employeeId="@employee.Id" class="btn btn-primary">Edit</button>
+							<button asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOffice.Id" class="btn btn-danger">Delete</button>
 						</form>
 					</td>
 				</tr>
