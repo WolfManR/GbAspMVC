@@ -23,6 +23,7 @@ namespace OfficeDashboard.Services
         public IEnumerable<Office> GetOffices() => OfficeList;
         public Office GetOffice(Guid officeId) => OfficeList.FirstOrDefault(o=>o.Id == officeId);
         public IEnumerable<Employee> GetEmployees(Guid officeId) => OfficeList.FirstOrDefault(office => office.Id == officeId)?.Employees;
+        public Employee GetEmployee(Guid id) => OfficeList.SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == id);
 
         public Guid RegisterEmployee(Guid officeId, Employee employee)
         {
