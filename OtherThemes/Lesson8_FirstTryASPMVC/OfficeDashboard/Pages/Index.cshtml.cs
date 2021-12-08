@@ -7,8 +7,6 @@ using OfficeDashboard.Models;
 using OfficeDashboard.Services;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OfficeDashboard.Pages
 {
@@ -26,7 +24,13 @@ namespace OfficeDashboard.Pages
         [BindProperty]
         public Guid CurrentOfficeId { get; set; }
 
+        [BindProperty]
+        public Employee NewEmployee { get; set; }
+
+        [ViewData]
         public SelectList OfficesSelectList { get; set; }
+
+        [ViewData]
         public Office SelectedOffice { get; set; }
 
         public void OnGet(Guid selectedOffice)
@@ -46,10 +50,17 @@ namespace OfficeDashboard.Pages
             return RedirectToPage(new { selectedOffice = CurrentOfficeId });
         }
 
-        public IActionResult OnPostDelete(Guid employeeId, Guid officeId)
+        public IActionResult OnPostCreate(Guid officeId)
         {
             if (!ModelState.IsValid) return Page();
 
+            _officeRepository.RegisterEmployee(officeId, NewEmployee);
+
+            return RedirectToPage(new { selectedOffice = officeId });
+        }
+
+        public IActionResult OnPostDelete(Guid employeeId, Guid officeId)
+        {
             _officeRepository.RemoveEmployee(employeeId);
 
             return RedirectToPage(new { selectedOffice = officeId });
