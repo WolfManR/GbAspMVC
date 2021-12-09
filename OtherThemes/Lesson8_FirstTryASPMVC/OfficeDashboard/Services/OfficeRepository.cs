@@ -60,7 +60,7 @@ namespace OfficeDashboard.Services
             return false;
         }
 
-        public bool UpdateEmployeeData(Guid officeId, Employee updated)
+        public bool UpdateEmployeeData(Guid officeId, Employee updated, Guid newOfficeId)
         {
             if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
             {
@@ -68,6 +68,12 @@ namespace OfficeDashboard.Services
                 {
                     employee.Name = updated.Name;
                     employee.Surname = updated.Surname;
+                    if (newOfficeId != Guid.Empty && newOfficeId != officeId && OfficeList.FirstOrDefault(o => o.Id == newOfficeId) is { } newOffice)
+                    {
+                        employee.Office = newOffice;
+                        newOffice.Employees.Add(employee);
+                        office.Employees.Remove(employee);
+                    }
                     return true;
                 }
             }

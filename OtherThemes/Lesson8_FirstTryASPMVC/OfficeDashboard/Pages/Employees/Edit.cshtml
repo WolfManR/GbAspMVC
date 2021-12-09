@@ -18,6 +18,11 @@
 		<span asp-validation-for="Employee.Surname" class="text-danger"></span>
 	</div>
 	<div>
+		<label asp-for="Employee.Office"></label>
+		<select asp-for="OfficeId" asp-items="Model.OfficesSelectList"></select>
+		<span asp-validation-for="OfficeId" class="text-danger"></span>
+	</div>
+	<div>
 		<button type="submit" asp-page-handler="GoBack">GoBack</button>
 		<button type="submit">Save</button>
 	</div>
