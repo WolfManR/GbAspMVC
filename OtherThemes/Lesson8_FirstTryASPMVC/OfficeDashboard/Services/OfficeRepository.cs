@@ -8,7 +8,7 @@ namespace OfficeDashboard.Services
     public class OfficeRepository
     {
         private static readonly List<Office> OfficeList;
-
+        private static readonly Office OutOfBorderEmployees;
         static OfficeRepository()
         {
             ModelsGenerator generator = new();
@@ -18,15 +18,35 @@ namespace OfficeDashboard.Services
                 generator.GenerateOffice(5),
                 generator.GenerateOffice(7)
             };
+
+            OutOfBorderEmployees = new Office() { Id = Guid.NewGuid(), Name = "Out of border employees" };
         }
 
-        public IEnumerable<Office> GetOffices() => OfficeList;
-        public Office GetOffice(Guid officeId) => OfficeList.FirstOrDefault(o=>o.Id == officeId);
-        public IEnumerable<Employee> GetEmployees(Guid officeId) => OfficeList.FirstOrDefault(office => office.Id == officeId)?.Employees;
-        public Employee GetEmployee(Guid id) => OfficeList.SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == id);
+        public IEnumerable<Office> GetOffices()
+        {
+            List<Office> offices = new List<Office>(OfficeList);
+            if(OutOfBorderEmployees.Employees.Count > 0) offices.Add(OutOfBorderEmployees);
+            return offices;
+        }
+
+        public Office GetOffice(Guid officeId)
+        {
+            if (IsOutOfBorderEmployeesOffice(officeId)) return OutOfBorderEmployees;
+            return OfficeList.FirstOrDefault(o => o.Id == officeId);
+        }
+
+        public IEnumerable<Employee> GetEmployees(Guid officeId)
+        {
+            if (IsOutOfBorderEmployeesOffice(officeId)) return OutOfBorderEmployees.Employees;
+            return OfficeList.FirstOrDefault(office => office.Id == officeId)?.Employees;
+        }
+
+        public Employee GetEmployee(Guid id) => GetOffices().SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == id);
 
         public Guid RegisterEmployee(Guid officeId, Employee employee)
         {
+            if (IsOutOfBorderEmployeesOffice(officeId)) return Guid.Empty;
+
             if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
             {
                 var id = Guid.NewGuid();
@@ -51,9 +71,20 @@ namespace OfficeDashboard.Services
 
         public bool RemoveOffice(Guid officeId)
         {
+            if (IsOutOfBorderEmployeesOffice(officeId)) return false;
+
             if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
             {
                 OfficeList.Remove(office);
+                if (office.Employees.Count > 0)
+                {
+                    foreach (var employee in office.Employees)
+                    {
+                        office.Employees.Remove(employee);
+                        OutOfBorderEmployees.Employees.Add(employee);
+                        employee.Office = OutOfBorderEmployees;
+                    }
+                }
                 return true;
             }
 
@@ -62,6 +93,8 @@ namespace OfficeDashboard.Services
 
         public bool UpdateEmployeeData(Guid officeId, Employee updated, Guid newOfficeId)
         {
+            if (IsOutOfBorderEmployeesOffice(newOfficeId)) return false;
+
             if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
             {
                 if (office.Employees.FirstOrDefault(e => e.Id == updated.Id) is { } employee)
@@ -83,6 +116,8 @@ namespace OfficeDashboard.Services
 
         public bool UpdateOfficeData(Office updated)
         {
+            if (IsOutOfBorderEmployeesOffice(updated.Id)) return false;
+
             if (OfficeList.FirstOrDefault(o => o.Id == updated.Id) is { } office)
             {
                office.Name = updated.Name;
@@ -91,5 +126,7 @@ namespace OfficeDashboard.Services
 
             return false;
         }
+
+        private bool IsOutOfBorderEmployeesOffice(Guid officeId) => officeId != Guid.Empty && OutOfBorderEmployees.Id == officeId;
     }
 }

@@ -70,5 +70,12 @@ namespace OfficeDashboard.Pages
         {
             return RedirectToPage("/Employees/Edit", new { id = employeeId });
         }
+
+        public IActionResult OnPostRemoveOffice()
+        {
+            _officeRepository.RemoveOffice(CurrentOfficeId);
+
+            return RedirectToPage(new { selectedOffice = CurrentOfficeId });
+        }
     }
 }

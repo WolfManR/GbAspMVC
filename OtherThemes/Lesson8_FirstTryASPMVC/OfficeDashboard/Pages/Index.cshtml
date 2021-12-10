@@ -1,19 +1,25 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+	ViewData["Title"] = "Home page";
 }
 
 <div class="container">
 	<form method="post" class="card p-3">
-		<label>Select office</label>
-		<select asp-for="CurrentOfficeId" asp-items="Model.OfficesSelectList"></select>
-		<input type="submit" value="Confirm"/>
+		<div style="display: flex">
+			<div style="display: flex; flex-grow: 1; flex-direction: column">
+				<h4>Select office</h4>
+				<select class="custom-select" asp-for="CurrentOfficeId" asp-items="Model.OfficesSelectList"></select>
+				<button class="mt-1 btn btn-primary">Confirm</button>
+			</div>
+			
+			<button class="ml-2 btn btn-danger" asp-page-handler="RemoveOffice">Remove</button>
+		</div>
 	</form>
 	
 	@if (Model.SelectedOffice is not null)
 	{
-		<h2 class="mt-5">Employees</h2>
+		<h5 class="mt-5">Employees</h5>
 
 		<form method="post" class="card p-3" asp-page-handler="Create" asp-route-officeId="@Model.SelectedOffice.Id">
 			<div class="row">
