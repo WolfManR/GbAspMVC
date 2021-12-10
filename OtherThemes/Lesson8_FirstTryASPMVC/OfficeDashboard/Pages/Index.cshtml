@@ -13,7 +13,10 @@
 				<button class="mt-1 btn btn-primary">Confirm</button>
 			</div>
 			
-			<button class="ml-2 btn btn-danger" asp-page-handler="RemoveOffice">Remove</button>
+			<div class="ml-2" style="display: flex; flex-direction: column; justify-content: end;">
+				<button class="btn btn-info" asp-page-handler="EditOffice">Edit</button>
+				<button class="mt-1 btn btn-danger" asp-page-handler="RemoveOffice">Remove</button>
+			</div>
 		</div>
 	</form>
 	
@@ -22,10 +25,11 @@
 		<h5 class="mt-5">Employees</h5>
 
 		<form method="post" class="card p-3" asp-page-handler="Create" asp-route-officeId="@Model.SelectedOffice.Id">
+			<h6>Register New:</h6>
 			<div class="row">
 				<div asp-validation-summary="All"></div>
 			</div>
-			<div class="form-group mb-0 align-middle">
+			<div class="form-group mb-0 mt-2 align-middle">
 				<label asp-for="NewEmployee.Name">Name</label>
 				<input type="text" asp-for="NewEmployee.Name" class="mr-5">
 				<label asp-for="NewEmployee.Surname"></label>

@@ -77,5 +77,10 @@ namespace OfficeDashboard.Pages
 
             return RedirectToPage(new { selectedOffice = CurrentOfficeId });
         }
+
+        public IActionResult OnPostEditOffice()
+        {
+            return RedirectToPage("/Offices/Edit", new { id = CurrentOfficeId });
+        }
     }
 }
