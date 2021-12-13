@@ -1,132 +1,167 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+using OfficeDashboard.Data;
+using OfficeDashboard.Data.Entities;
+using OfficeDashboard.ViewModels;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using OfficeDashboard.Models;
+using System.Threading.Tasks;
 
 namespace OfficeDashboard.Services
 {
     public class OfficeRepository
     {
-        private static readonly List<Office> OfficeList;
-        private static readonly Office OutOfBorderEmployees;
-        static OfficeRepository()
+        private readonly OfficeDbContext _dbContext;
+        // ReSharper disable once InconsistentNaming
+        private readonly string NameOfNotAssignedEmployeesOffice;
+
+        public OfficeRepository(OfficeDbContext dbContext, IConfiguration configuration)
         {
-            ModelsGenerator generator = new();
-            OfficeList = new List<Office>()
+            _dbContext = dbContext;
+            NameOfNotAssignedEmployeesOffice = configuration.GetValue<string>(nameof(NameOfNotAssignedEmployeesOffice));
+        }
+
+        public Task<List<OfficeSelectListItem>> GetOffices()
+        {
+            return _dbContext.Offices
+                .AsNoTracking()
+                .Select(o => new OfficeSelectListItem()
+                {
+                    Id = o.Id,
+                    Name = o.Name
+                }).ToListAsync();
+        }
+
+        public async Task<Office> GetOffice(Guid officeId)
+        {
+            if (await _dbContext.Offices.AsNoTracking().Include(o => o.Employees).FirstOrDefaultAsync(o => o.Id == officeId) is not { } office) return null;
+            return new Office()
             {
-                generator.GenerateOffice(6),
-                generator.GenerateOffice(5),
-                generator.GenerateOffice(7)
+                Id = officeId,
+                Name = office.Name,
+                Employees = office.Employees.Select(e => new ListEmployee()
+                {
+                    Id = e.Id,
+                    Name = e.FirstName,
+                    Surname = e.LastName
+                }).ToList()
+            };
+        }
+
+        public async Task<EditOffice> GetOfficeForEdit(Guid officeId)
+        {
+            if (await _dbContext.Offices.AsNoTracking().FirstOrDefaultAsync(o => o.Id == officeId) is not { } office) return null;
+            return new EditOffice()
+            {
+                Id = officeId,
+                Name = office.Name
+            };
+        }
+
+        public async Task<IReadOnlyCollection<ListEmployee>> GetEmployees(Guid officeId)
+        {
+            if (await _dbContext.Offices.AsNoTracking().Include(o => o.Employees).FirstOrDefaultAsync(o => o.Id == officeId) is not { } office) return Array.Empty<ListEmployee>();
+            return office.Employees.Select(e => new ListEmployee()
+            {
+                Id = e.Id,
+                Name = e.FirstName,
+                Surname = e.LastName
+            }).ToList();
+        }
+
+        public async Task<EditEmployee> GetEmployeeForEdit(Guid id)
+        {
+            if (await _dbContext.Employees.AsNoTracking().Include(e => e.Office).FirstOrDefaultAsync(e => e.Id == id) is not { } employee) return null;
+            return new EditEmployee()
+            {
+                Id = employee.Id,
+                Name = employee.FirstName,
+                Surname = employee.LastName,
+                OfficeId = employee.Office.Id
+            };
+        }
+
+        public async Task<Guid> RegisterOffice(CreateOffice office)
+        {
+            var entity = new OfficeEntity()
+            {
+                Name = office.Name
             };
 
-            OutOfBorderEmployees = new Office() { Id = Guid.NewGuid(), Name = "Out of border employees" };
+            _dbContext.Offices.Add(entity);
+            await _dbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
-        public IEnumerable<Office> GetOffices()
+        public async Task<Guid> RegisterEmployee(CreateEmployee employee)
         {
-            List<Office> offices = new List<Office>(OfficeList);
-            if(OutOfBorderEmployees.Employees.Count > 0) offices.Add(OutOfBorderEmployees);
-            return offices;
-        }
-
-        public Office GetOffice(Guid officeId)
-        {
-            if (IsOutOfBorderEmployeesOffice(officeId)) return OutOfBorderEmployees;
-            return OfficeList.FirstOrDefault(o => o.Id == officeId);
-        }
-
-        public IEnumerable<Employee> GetEmployees(Guid officeId)
-        {
-            if (IsOutOfBorderEmployeesOffice(officeId)) return OutOfBorderEmployees.Employees;
-            return OfficeList.FirstOrDefault(office => office.Id == officeId)?.Employees;
-        }
-
-        public Employee GetEmployee(Guid id) => GetOffices().SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == id);
-
-        public Guid RegisterEmployee(Guid officeId, Employee employee)
-        {
-            if (IsOutOfBorderEmployeesOffice(officeId)) return Guid.Empty;
-
-            if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
+            var entity = new EmployeeEntity()
             {
-                var id = Guid.NewGuid();
-                employee.Id = id;
-                office.Employees.Add(employee);
-                employee.Office = office;
-                return id;
+                FirstName = employee.Name,
+                LastName = employee.Surname
+            };
+
+            if (await _dbContext.Offices.Include(o => o.Employees).FirstOrDefaultAsync(o => o.Id == employee.OfficeId) is { } office)
+            {
+                entity.Office = office;
             }
 
-            return Guid.Empty;
+            await _dbContext.Employees.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
-        public bool RemoveEmployee(Guid employeeId)
+        public async Task<bool> RemoveEmployee(Guid employeeId)
         {
-            var employee = OfficeList.SelectMany(o => o.Employees).FirstOrDefault(e => e.Id == employeeId);
-            if (employee is null) return false;
+            if (await _dbContext.Employees.FirstOrDefaultAsync(e => e.Id == employeeId) is not { } employee) return false;
 
-            employee.Office.Employees.Remove(employee);
-            employee.Office = null;
+            _dbContext.Employees.Remove(employee);
+            await _dbContext.SaveChangesAsync();
+
             return true;
         }
 
-        public bool RemoveOffice(Guid officeId)
+        public async Task<bool> RemoveOffice(Guid officeId)
         {
-            if (IsOutOfBorderEmployeesOffice(officeId)) return false;
+            if (await _dbContext.Offices.AsNoTracking().Include(o => o.Employees).FirstOrDefaultAsync(o => o.Id == officeId) is not { } office) return false;
 
-            if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
-            {
-                OfficeList.Remove(office);
-                if (office.Employees.Count > 0)
-                {
-                    foreach (var employee in office.Employees)
-                    {
-                        office.Employees.Remove(employee);
-                        OutOfBorderEmployees.Employees.Add(employee);
-                        employee.Office = OutOfBorderEmployees;
-                    }
-                }
-                return true;
-            }
-
-            return false;
+            _dbContext.Offices.Remove(office);
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
-        public bool UpdateEmployeeData(Guid officeId, Employee updated, Guid newOfficeId)
+        public async Task<bool> UpdateEmployeeData(EditEmployee editEmployee)
         {
-            if (IsOutOfBorderEmployeesOffice(newOfficeId)) return false;
+            if (await _dbContext.Employees.Include(e => e.Office).FirstOrDefaultAsync(e => e.Id == editEmployee.Id) is not { } employee) return false;
 
-            if (OfficeList.FirstOrDefault(o => o.Id == officeId) is { } office)
+
+            employee.FirstName = editEmployee.Name;
+            employee.LastName = editEmployee.Surname;
+
+            var newOfficeId = editEmployee.OfficeId;
+            if (newOfficeId != Guid.Empty && newOfficeId != employee.Office.Id && await _dbContext.Offices.FirstOrDefaultAsync(o => o.Id == newOfficeId) is { } newOffice)
             {
-                if (office.Employees.FirstOrDefault(e => e.Id == updated.Id) is { } employee)
-                {
-                    employee.Name = updated.Name;
-                    employee.Surname = updated.Surname;
-                    if (newOfficeId != Guid.Empty && newOfficeId != officeId && OfficeList.FirstOrDefault(o => o.Id == newOfficeId) is { } newOffice)
-                    {
-                        employee.Office = newOffice;
-                        newOffice.Employees.Add(employee);
-                        office.Employees.Remove(employee);
-                    }
-                    return true;
-                }
+                employee.Office = newOffice;
             }
 
-            return false;
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
-        public bool UpdateOfficeData(Office updated)
+        public async Task<bool> UpdateOfficeData(EditOffice updated)
         {
-            if (IsOutOfBorderEmployeesOffice(updated.Id)) return false;
+            if (await _dbContext.Offices.AsNoTracking().Include(o => o.Employees).FirstOrDefaultAsync(o => o.Id == updated.Id) is not { } office) return false;
 
-            if (OfficeList.FirstOrDefault(o => o.Id == updated.Id) is { } office)
-            {
-               office.Name = updated.Name;
-               return true;
-            }
-
-            return false;
+            office.Name = updated.Name;
+            return true;
         }
 
-        private bool IsOutOfBorderEmployeesOffice(Guid officeId) => officeId != Guid.Empty && OutOfBorderEmployees.Id == officeId;
+        private async Task<bool> IsContainsNotAssignedToOfficeEmployees() =>
+            await _dbContext.Employees.AsNoTracking().Include(e => e.Office).AnyAsync(employee => employee.Office == null);
     }
 }
