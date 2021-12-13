@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-
-using OfficeDashboard.Models;
 using OfficeDashboard.Services;
 
 using System;
+using System.Threading.Tasks;
+using OfficeDashboard.ViewModels;
 
 namespace OfficeDashboard.Pages
 {
@@ -25,21 +25,25 @@ namespace OfficeDashboard.Pages
         public Guid CurrentOfficeId { get; set; }
 
         [BindProperty]
-        public Employee NewEmployee { get; set; }
+        public CreateEmployee NewEmployee { get; set; }
 
         [ViewData]
         public SelectList OfficesSelectList { get; set; }
 
         [ViewData]
+        public Guid SelectedOfficeId { get; set; }
+        [ViewData]
         public Office SelectedOffice { get; set; }
 
-        public void OnGet(Guid selectedOffice)
+        public async Task OnGetAsync(Guid selectedOffice)
         {
-            OfficesSelectList = new SelectList(_officeRepository.GetOffices(), "Id", "Name");
+            var offices = await _officeRepository.GetOffices();
+            OfficesSelectList = new SelectList(offices, "Id", "Name");
             if (selectedOffice != Guid.Empty)
             {
                 CurrentOfficeId = selectedOffice;
-                SelectedOffice = _officeRepository.GetOffice(selectedOffice);
+                SelectedOffice = await _officeRepository.GetOffice(selectedOffice);
+                SelectedOfficeId = SelectedOffice.Id;
             }
         }
 
@@ -50,18 +54,19 @@ namespace OfficeDashboard.Pages
             return RedirectToPage(new { selectedOffice = CurrentOfficeId });
         }
 
-        public IActionResult OnPostCreate(Guid officeId)
+        public async Task<IActionResult> OnPostCreate(Guid officeId)
         {
             if (!ModelState.IsValid) return Page();
 
-            _officeRepository.RegisterEmployee(officeId, NewEmployee);
+            if (officeId != Guid.Empty) NewEmployee.OfficeId = officeId;
+            await _officeRepository.RegisterEmployee(NewEmployee);
 
             return RedirectToPage(new { selectedOffice = officeId });
         }
 
-        public IActionResult OnPostDelete(Guid employeeId, Guid officeId)
+        public async Task<IActionResult> OnPostDelete(Guid employeeId, Guid officeId)
         {
-            _officeRepository.RemoveEmployee(employeeId);
+            await _officeRepository.RemoveEmployee(employeeId);
 
             return RedirectToPage(new { selectedOffice = officeId });
         }
@@ -71,9 +76,9 @@ namespace OfficeDashboard.Pages
             return RedirectToPage("/Employees/Edit", new { id = employeeId });
         }
 
-        public IActionResult OnPostRemoveOffice()
+        public async Task<IActionResult> OnPostRemoveOffice()
         {
-            _officeRepository.RemoveOffice(CurrentOfficeId);
+            await _officeRepository.RemoveOffice(CurrentOfficeId);
 
             return RedirectToPage(new { selectedOffice = CurrentOfficeId });
         }
@@ -81,6 +86,11 @@ namespace OfficeDashboard.Pages
         public IActionResult OnPostEditOffice()
         {
             return RedirectToPage("/Offices/Edit", new { id = CurrentOfficeId });
+        }
+
+        public IActionResult OnPostCreateOffice()
+        {
+            return RedirectToPage("/Offices/Create", new { openedOfficeId = CurrentOfficeId });
         }
     }
 }
