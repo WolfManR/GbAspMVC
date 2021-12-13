@@ -16,6 +16,11 @@ namespace OfficeDashboard.ViewModels
         public string Name { get; init; }
     }
 
+    public class CreateOffice
+    {
+        public string Name { get; set; }
+    }
+
     public class EditOffice
     {
         public Guid Id { get; set; }
