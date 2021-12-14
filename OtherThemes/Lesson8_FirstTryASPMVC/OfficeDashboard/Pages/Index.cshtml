@@ -21,10 +21,8 @@
 		</div>
 	</form>
 	
-	<h5 class="mt-5">Employees</h5>
-
-	<form method="post" class="card p-3" asp-page-handler="Create" asp-route-officeId="@Model.SelectedOfficeId">
-		<h6>Register New:</h6>
+	<form method="post" class="card p-3 mt-3" asp-page-handler="Create" asp-route-officeId="@Model.SelectedOfficeId">
+		<h6>Register Employee:</h6>
 		<div class="row">
 			<div asp-validation-summary="All"></div>
 		</div>
@@ -37,14 +35,42 @@
 		</div>
 	</form>
 	
-	@if (Model.SelectedOffice is not null)
+	@if (Model.NotAssignedToOfficeEmployees?.Count > 0)
 	{
-		<table class="table mt-5">
+		<h6 class="mt-5">Awaiting work:</h6>
+		<table class="table">
 			<thead>
 			<tr>
 				<th scope="col">Name</th>
 				<th scope="col">Surname</th>
-				<th scope="col">Delete</th>
+				<th scope="col"></th>
+			</tr>
+			</thead>
+			@foreach (var employee in Model.NotAssignedToOfficeEmployees)
+			{
+				<tr>
+					<td>@employee.Name</td>
+					<td>@employee.Surname</td>
+					<td>
+						<form method="post">
+							<button asp-page-handler="Edit" asp-route-employeeId="@employee.Id" class="btn btn-primary">Edit</button>
+							<button asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOfficeId" class="btn btn-danger">Delete</button>
+						</form>
+					</td>
+				</tr>
+			}
+		</table>
+	}
+
+	@if (Model.SelectedOffice is not null)
+	{
+		<h5 class="mt-5">Employees</h5>
+		<table class="table">
+			<thead>
+			<tr>
+				<th scope="col">Name</th>
+				<th scope="col">Surname</th>
+				<th scope="col"></th>
 			</tr>
 			</thead>
 			@foreach (var employee in Model.SelectedOffice.Employees)
@@ -55,7 +81,7 @@
 					<td>
 						<form method="post">
 							<button asp-page-handler="Edit" asp-route-employeeId="@employee.Id" class="btn btn-primary">Edit</button>
-							<button asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOffice.Id" class="btn btn-danger">Delete</button>
+							<button asp-page-handler="Delete" asp-route-employeeId="@employee.Id" asp-route-officeId="@Model.SelectedOfficeId" class="btn btn-danger">Delete</button>
 						</form>
 					</td>
 				</tr>

@@ -80,7 +80,7 @@ namespace OfficeDashboard.Services
                 Id = employee.Id,
                 Name = employee.FirstName,
                 Surname = employee.LastName,
-                OfficeId = employee.Office.Id
+                OfficeId = employee.Office?.Id ?? Guid.Empty
             };
         }
 
@@ -144,7 +144,7 @@ namespace OfficeDashboard.Services
             employee.LastName = editEmployee.Surname;
 
             var newOfficeId = editEmployee.OfficeId;
-            if (newOfficeId != Guid.Empty && newOfficeId != employee.Office.Id && await _dbContext.Offices.FirstOrDefaultAsync(o => o.Id == newOfficeId) is { } newOffice)
+            if (newOfficeId != Guid.Empty && newOfficeId != employee.Office?.Id && await _dbContext.Offices.FirstOrDefaultAsync(o => o.Id == newOfficeId) is { } newOffice)
             {
                 employee.Office = newOffice;
             }
@@ -161,7 +161,23 @@ namespace OfficeDashboard.Services
             return true;
         }
 
-        private async Task<bool> IsContainsNotAssignedToOfficeEmployees() =>
+        public async Task<IReadOnlyCollection<ListEmployee>> GetEmployeesThatNotAssignedToAnyOffice()
+        {
+            var employees = await _dbContext.Employees
+                .AsNoTracking()
+                .Include(e => e.Office)
+                .Where(e => e.Office == null)
+                .Select(e => new ListEmployee
+                {
+                    Id = e.Id,
+                    Name = e.FirstName,
+                    Surname = e.LastName
+                })
+                .ToListAsync();
+            return employees;
+        }
+
+        public async Task<bool> IsContainsNotAssignedToOfficeEmployees() =>
             await _dbContext.Employees.AsNoTracking().Include(e => e.Office).AnyAsync(employee => employee.Office == null);
     }
 }

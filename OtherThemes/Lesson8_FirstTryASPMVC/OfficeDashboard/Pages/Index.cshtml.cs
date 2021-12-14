@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using OfficeDashboard.Services;
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using OfficeDashboard.ViewModels;
 
@@ -34,6 +35,8 @@ namespace OfficeDashboard.Pages
         public Guid SelectedOfficeId { get; set; }
         [ViewData]
         public Office SelectedOffice { get; set; }
+        [ViewData]
+        public IReadOnlyCollection<ListEmployee> NotAssignedToOfficeEmployees { get; set; }
 
         public async Task OnGetAsync(Guid selectedOffice)
         {
@@ -44,6 +47,11 @@ namespace OfficeDashboard.Pages
                 CurrentOfficeId = selectedOffice;
                 SelectedOffice = await _officeRepository.GetOffice(selectedOffice);
                 SelectedOfficeId = SelectedOffice.Id;
+            }
+
+            if (await _officeRepository.IsContainsNotAssignedToOfficeEmployees())
+            {
+                NotAssignedToOfficeEmployees = await _officeRepository.GetEmployeesThatNotAssignedToAnyOffice();
             }
         }
 
