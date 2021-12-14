@@ -31,7 +31,8 @@ namespace OfficeDashboard.Pages.Employees
         {
             Employee = await _officeRepository.GetEmployeeForEdit(id);
             OriginalOfficeId = Employee.OfficeId;
-            OfficesSelectList = new SelectList(await _officeRepository.GetOffices(), "Id", "Name");
+            var offices = await _officeRepository.GetOffices();
+            OfficesSelectList = new SelectList(offices, "Id", "Name");
         }
 
         public async Task<IActionResult> OnPostAsync()

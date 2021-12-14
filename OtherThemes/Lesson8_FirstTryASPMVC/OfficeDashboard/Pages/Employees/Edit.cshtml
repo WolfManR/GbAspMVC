@@ -19,7 +19,9 @@
 	</div>
 	<div>
 		<label asp-for="Employee.OfficeId">Office</label>
-		<select asp-for="Employee.OfficeId" asp-items="Model.OfficesSelectList"></select>
+		<select asp-for="Employee.OfficeId" asp-items="Model.OfficesSelectList">
+			<option value="@Guid.Empty">None</option>
+		</select>
 		<span asp-validation-for="Employee.OfficeId" class="text-danger"></span>
 	</div>
 	<div>
