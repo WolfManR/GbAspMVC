@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.32002.185
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI", "src\UI\UI.csproj", "{C8249F15-FD01-4779-8170-A1711B3FB03C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailTemplates.Razor", "src\MailTemplates.Razor\MailTemplates.Razor.csproj", "{D5C7B44C-B8E8-49A4-8106-65F4C51BF2A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MailTemplates.Razor", "src\MailTemplates.Razor\MailTemplates.Razor.csproj", "{D5C7B44C-B8E8-49A4-8106-65F4C51BF2A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailSender.MailKit", "src\MailSender.MailKit\MailSender.MailKit.csproj", "{D9FEC859-2893-405E-B59A-601B84A9EFE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D5C7B44C-B8E8-49A4-8106-65F4C51BF2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5C7B44C-B8E8-49A4-8106-65F4C51BF2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5C7B44C-B8E8-49A4-8106-65F4C51BF2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9FEC859-2893-405E-B59A-601B84A9EFE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9FEC859-2893-405E-B59A-601B84A9EFE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9FEC859-2893-405E-B59A-601B84A9EFE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9FEC859-2893-405E-B59A-601B84A9EFE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
