@@ -1,0 +1,29 @@
+﻿@page
+@model UI.Pages.Templates.CreateModel
+@{
+}
+
+
+<div class="row">
+	<div class="col-sm-6">
+		<div class="card">
+			<div class="card-body">
+				<form method="post">
+					<h5 class="card-title">Input Template</h5>
+					<textarea asp-for="Template" class="form-control" rows="3"></textarea>
+					<button asp-page-handler="Preview" class="btn btn-primary">See result</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	@if (!string.IsNullOrEmpty(Model.Preview))
+	{
+		<div class="col-sm-6">
+			<div class="card">
+				<div class="card-body">
+					@Html.Raw(@Model.Preview)
+				</div>
+			</div>
+		</div>
+	}
+</div>

@@ -8,6 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MailTemplates.Razor;
+using RazorEngineCore;
+using UI.Services;
 
 namespace UI
 {
@@ -23,6 +26,9 @@ namespace UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IRazorEngine, RazorEngine>();
+            services.AddSingleton<ModelsGenerator>();
+            services.AddSingleton<MailContentBuilder>();
             services.AddRazorPages();
         }
 
