@@ -10,6 +10,8 @@
 			<div class="card-body">
 				<form method="post">
 					<h5 class="card-title">Input Template</h5>
+					<label>Select data models that will be used in preview</label>
+					<select asp-for="ModelType" asp-items="Model.ModelTypes"></select>
 					<textarea asp-for="Template" class="form-control" rows="3"></textarea>
 					<button asp-page-handler="Preview" class="btn btn-primary">See result</button>
 				</form>

@@ -1,3 +1,4 @@
+using System.Linq;
 using MailTemplates.Razor;
 
 using Microsoft.AspNetCore.Mvc;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 using System.Threading.Tasks;
-
+using UI.DataModels;
 using UI.Services;
 
 namespace UI.Pages.Templates
@@ -30,7 +31,7 @@ namespace UI.Pages.Templates
             ModelTypes = new SelectList(
                 new[]
                 {
-                    (type: "Book", name: "Book"),
+                    new {type=nameof(Book), name = nameof(Book)},
                 },
                 "type",
                 "name");
@@ -43,9 +44,14 @@ namespace UI.Pages.Templates
         {
             if (string.IsNullOrWhiteSpace(Template)) return Page();
 
-            var preview = await _mailContentBuilder.BuildWithTemplate(Template, _modelsGenerator.GenerateBooks(3));
+            object data = ModelType switch
+                          {
+                              "Book" => _modelsGenerator.GenerateBooks().First()
+                          };
 
-            return RedirectToPage(new { preview, template = Template });
+            var preview = await _mailContentBuilder.BuildWithTemplate(Template, data);
+
+            return RedirectToPage(new { preview, usedTemplate = Template, selectedModelType = ModelType });
         }
     }
 }
