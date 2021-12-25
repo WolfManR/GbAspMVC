@@ -27,8 +27,9 @@ namespace UI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IRazorEngine, RazorEngine>();
-            services.AddSingleton<ModelsGenerator>();
             services.AddSingleton<MailContentBuilder>();
+            services.AddSingleton<ModelsGenerator>();
+            services.AddSingleton<TemplatesRepository>();
             services.AddRazorPages();
         }
 
