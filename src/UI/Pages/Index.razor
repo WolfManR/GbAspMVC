@@ -1,0 +1,68 @@
+﻿@page "/"
+@using UI.DataModels
+@using UI.Services
+@inject TemplatesRepository _templatesRepository
+
+<div>
+	<ul>
+		<li><button @onclick="()=>OpenRecordEditor()">Create</button></li>
+		<li><a href=""></a></li>
+		<li><a href=""></a></li>
+	</ul>
+
+	@if (IsTemplatesVisible)
+	{
+		<table>
+			<thead>
+			<tr>
+				<th>Name</th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody>
+			@foreach (TemplateRecord template in Templates)
+			{
+				<tr>
+					<td>@template.Name</td>
+					<td>
+						<button @onclick="() => OpenRecordEditor(template.Name, template.RawTemplate)">Edit</button>
+						<button @onclick="() => DeleteRecord(template.Name)">Delete</button>
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	}
+	
+	@if (IsTemplateEditorVisible)
+	{
+		<TemplateEditor></TemplateEditor>
+	}
+</div>
+
+@code {
+	public IReadOnlyCollection<TemplateRecord> Templates { get; set; }
+
+	private bool IsTemplatesVisible { get; set; }
+	private bool IsTemplateEditorVisible { get; set; }
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		Templates = _templatesRepository.Get().ToArray();
+		IsTemplatesVisible = true;
+	}
+
+
+	private void OpenRecordEditor(string? name = null, string? rawTemplate = null)
+	{
+		IsTemplateEditorVisible = true;
+	}
+
+	private void DeleteRecord(string name)
+	{
+		_templatesRepository.Remove(name);
+		Templates = _templatesRepository.Get().ToArray();
+	}
+}
