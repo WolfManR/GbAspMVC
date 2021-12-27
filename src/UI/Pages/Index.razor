@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using UI.DataModels
+@using UI.Pages.Templates
 @using UI.Services
 @inject TemplatesRepository _templatesRepository
 
@@ -16,6 +17,7 @@
 			<thead>
 			<tr>
 				<th>Name</th>
+				<th>RawTemplate</th>
 				<th></th>
 			</tr>
 			</thead>
@@ -24,6 +26,7 @@
 			{
 				<tr>
 					<td>@template.Name</td>
+					<td>@template.RawTemplate</td>
 					<td>
 						<button @onclick="() => OpenRecordEditor(template.Name, template.RawTemplate)">Edit</button>
 						<button @onclick="() => DeleteRecord(template.Name)">Delete</button>
@@ -36,33 +39,57 @@
 	
 	@if (IsTemplateEditorVisible)
 	{
-		<TemplateEditor></TemplateEditor>
+		<TemplateEditor Template="@TemplateRecordOnEdit"
+		                OnCreateDone="HandleTemplateCreate"
+		                OnEditDone="HandleTemplateEdit">
+
+		</TemplateEditor>
 	}
 </div>
 
 @code {
-	public IReadOnlyCollection<TemplateRecord> Templates { get; set; }
+	public ICollection<TemplateRecord> Templates { get; set; }
 
 	private bool IsTemplatesVisible { get; set; }
 	private bool IsTemplateEditorVisible { get; set; }
+
+	private TemplateRecord TemplateRecordOnEdit { get; set; } = new();
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
 
-		Templates = _templatesRepository.Get().ToArray();
+		Templates = _templatesRepository.Get().ToList();
 		IsTemplatesVisible = true;
 	}
 
-
 	private void OpenRecordEditor(string? name = null, string? rawTemplate = null)
 	{
+		TemplateRecordOnEdit.Name = name;
+		TemplateRecordOnEdit.RawTemplate = rawTemplate;
 		IsTemplateEditorVisible = true;
 	}
 
 	private void DeleteRecord(string name)
 	{
 		_templatesRepository.Remove(name);
-		Templates = _templatesRepository.Get().ToArray();
+		Templates = _templatesRepository.Get().ToList();
 	}
+
+	private void HandleTemplateCreate(TemplateRecord record)
+	{
+		Templates.Add(record);
+		_templatesRepository.Save(record);
+		IsTemplateEditorVisible = false;
+	}
+
+	private void HandleTemplateEdit(TemplateRecord record)
+	{
+		if(Templates.FirstOrDefault(r => r.Name == record.Name) is not {} existRecord) return;
+		existRecord.Name = record.Name;
+		existRecord.RawTemplate = record.RawTemplate;
+		_templatesRepository.Save(record);
+		IsTemplateEditorVisible = false;
+	}
+
 }

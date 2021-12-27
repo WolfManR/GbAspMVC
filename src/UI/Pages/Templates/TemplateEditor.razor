@@ -12,16 +12,21 @@
 	<div class="col-sm-6">
 		<div class="card">
 			<div class="card-body">
-				<h5 class="card-title">Input Template</h5>
-				<label asp-for="Name"></label>
-				<InputText type="text" @bind="TemplateName"/>
-				<label>Select data models that will be used in preview</label>
-				<InputSelect @bind-Value="DataModelType">
-					<option value="Book">Book</option>
-				</InputSelect>
-				<InputTextArea @bind="RawTemplate" class="form-control" rows="3"></InputTextArea>
-				<button @onclick="ShowPreview" class="btn btn-primary">See result</button>
-				<button @onclick="SaveTemplate" class="btn btn-primary">Save</button>
+				<EditForm Model="EditingRecord">
+					<h5 class="card-title">Input Template</h5>
+					<label asp-for="Name"></label>
+					<InputText type="text" @bind-Value="EditingRecord.Name"/><br/>
+					<label>Select data models that will be used in preview</label>
+					<InputSelect @bind-Value="EditingRecord.DataModelType">
+						@foreach (var (type,alias) in _dataTypes)
+						{
+							<option value="@type">@alias</option>
+						}
+					</InputSelect>
+					<InputTextArea @bind-Value="EditingRecord.RawTemplate" class="form-control" rows="3"></InputTextArea>
+					<button @onclick="ShowPreview" class="btn btn-primary">See result</button>
+					<button @onclick="SaveTemplate" class="btn btn-primary">Save</button>
+				</EditForm>
 			</div>
 		</div>
 	</div>
@@ -41,31 +46,75 @@
 	private MarkupString? Preview { get; set; }
 
 	[Parameter]
-	public  string? TemplateName { get; set; }
+	public bool IsEditMode { get; set; }
 
 	[Parameter]
-	public string? RawTemplate { get; set; }
+	public TemplateRecord Template
+	{
+		set
+		{
+			EditingRecord.Name = value.Name;
+			EditingRecord.RawTemplate = value.RawTemplate;
+		}
+	}
 
-	public string DataModelType { get; set; }
+	[Parameter]
+	public EventCallback<TemplateRecord> OnEditDone { get; set; }
+
+	[Parameter]
+	public EventCallback<TemplateRecord> OnCreateDone { get; set; }
+
+	private EditingTemplateRecord EditingRecord { get; set; } = new();
+
+	private List<DataType> _dataTypes;
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		_dataTypes = new List<DataType>()
+		{
+			new DataType(nameof(Book), "Book")
+		};
+		EditingRecord.DataModelType = _dataTypes.First().Type;
+	}
 
 	private async Task ShowPreview()
 	{
-		object data = DataModelType switch
+		object data = EditingRecord.DataModelType switch
 			{
 				"Book" => _previewDataGenerator.GenerateBooks().First(),
 					_ => null
 			};
 		if(data is null) return;
-		Preview = (MarkupString)await _previewBuilder.BuildWithTemplate(RawTemplate, data);
+		Preview = (MarkupString)await _previewBuilder.BuildWithTemplate(EditingRecord.RawTemplate, data);
 	}
 
-	private void SaveTemplate()
+	private async Task SaveTemplate()
 	{
-		if(TemplateName is null || RawTemplate is null) return;
-		_templatesRepository.Save(new TemplateRecord()
+		if(EditingRecord.Name is null || EditingRecord.RawTemplate is null) return;
+
+		var record = new TemplateRecord()
 		{
-			RawTemplate = RawTemplate,
-			Name = TemplateName
-		});
+			RawTemplate = EditingRecord.RawTemplate,
+			Name = EditingRecord.Name
+		};
+		
+		if (IsEditMode)
+		{
+			await OnEditDone.InvokeAsync(record);
+			return;
+		}
+
+		await OnCreateDone.InvokeAsync(record);
 	}
+
+	class EditingTemplateRecord
+	{
+		public string Name { get; set; }
+		public string RawTemplate { get; set; }
+		public string DataModelType { get; set; }
+	}
+
+	record DataType(string Type, string Alias);
 }
