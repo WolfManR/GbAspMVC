@@ -1,15 +1,18 @@
+using MailSender.MailKit;
+
+using MailTemplates.Razor;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MailTemplates.Razor;
 using RazorEngineCore;
+
+using TemplateMailSender.Core.MailSender;
+using TemplateMailSender.Core.TemplateBuilder;
+
 using UI.Services;
 
 namespace UI
@@ -27,7 +30,8 @@ namespace UI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IRazorEngine, RazorEngine>();
-            services.AddSingleton<MailContentBuilder>();
+            services.AddSingleton<ITemplateBuilder, MailContentBuilder>();
+            services.AddSingleton<IEmailService, EmailService>();
             services.AddSingleton<ModelsGenerator>();
             services.AddSingleton<TemplatesRepository>();
             services.AddRazorPages();

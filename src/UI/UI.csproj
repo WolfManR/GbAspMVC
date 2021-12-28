@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MailSender.MailKit\MailSender.MailKit.csproj" />
     <ProjectReference Include="..\MailTemplates.Razor\MailTemplates.Razor.csproj" />
   </ItemGroup>
 

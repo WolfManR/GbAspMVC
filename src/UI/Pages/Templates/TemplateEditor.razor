@@ -1,9 +1,10 @@
 ﻿@using UI.Services
 @using MailTemplates.Razor
 @using Microsoft.AspNetCore.Mvc.Rendering
+@using TemplateMailSender.Core.TemplateBuilder
 @using UI.DataModels
 @inject TemplatesRepository _templatesRepository
-@inject MailContentBuilder _previewBuilder
+@inject ITemplateBuilder _templateBuilder
 @inject ModelsGenerator _previewDataGenerator
 
 <h3>TemplateEditor</h3>
@@ -87,7 +88,7 @@
 					_ => null
 			};
 		if(data is null) return;
-		Preview = (MarkupString)await _previewBuilder.Build(EditingRecord.RawTemplate, data);
+		Preview = (MarkupString)await _templateBuilder.Build(EditingRecord.RawTemplate, data);
 	}
 
 	private async Task SaveTemplate()
