@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
 using RazorEngineCore;
+using TemplateMailSender.Core.TemplateBuilder;
 
 namespace MailTemplates.Razor
 {
-    public class MailContentBuilder
+    public class MailContentBuilder : ITemplateBuilder
     {
         private readonly IRazorEngine _razorEngine;
 
@@ -12,7 +13,7 @@ namespace MailTemplates.Razor
             _razorEngine = razorEngine;
         }
 
-        public async Task<string> BuildWithTemplate(string template, object model)
+        public async Task<string> Build(string template, object model)
         {
             var templateCompiler = await _razorEngine.CompileAsync(template);
 

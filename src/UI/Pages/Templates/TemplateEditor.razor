@@ -87,7 +87,7 @@
 					_ => null
 			};
 		if(data is null) return;
-		Preview = (MarkupString)await _previewBuilder.BuildWithTemplate(EditingRecord.RawTemplate, data);
+		Preview = (MarkupString)await _previewBuilder.Build(EditingRecord.RawTemplate, data);
 	}
 
 	private async Task SaveTemplate()
