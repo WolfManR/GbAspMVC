@@ -1,0 +1,25 @@
+﻿@page "/Send" 
+@using TemplateMailSender.Core.MailSender
+
+<div>
+	<EditForm Model="EmailMessage">
+		<InputText @bind-Value="EmailMessage.Subject" DisplayName="Subject"/>
+		<InputTextArea @bind-Value="EmailMessage.Content"/>
+		<button @onclick="SendMail">Send</button>
+		<button @onclick="ScheduleSend">Schedule Send</button>
+	</EditForm>
+</div>
+
+
+@code {
+	public EmailMessage EmailMessage { get; set; }
+
+	private void SendMail()
+	{
+	}
+
+	private void ScheduleSend()
+	{
+	}
+
+}
