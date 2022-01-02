@@ -14,7 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Plans.md = Plans.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateMailSender.Core", "src\TemplateMailSender.Core\TemplateMailSender.Core.csproj", "{5BC752E3-F78C-4526-B982-B181C83D8A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateMailSender.Core", "src\TemplateMailSender.Core\TemplateMailSender.Core.csproj", "{5BC752E3-F78C-4526-B982-B181C83D8A62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailScheduler", "src\MailScheduler\MailScheduler.csproj", "{3BCB487C-1B26-48EC-B3A5-306ABF9242CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{5BC752E3-F78C-4526-B982-B181C83D8A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BC752E3-F78C-4526-B982-B181C83D8A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BC752E3-F78C-4526-B982-B181C83D8A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BCB487C-1B26-48EC-B3A5-306ABF9242CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BCB487C-1B26-48EC-B3A5-306ABF9242CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BCB487C-1B26-48EC-B3A5-306ABF9242CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BCB487C-1B26-48EC-B3A5-306ABF9242CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
