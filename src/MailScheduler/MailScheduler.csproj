@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>c4b8d2db-699a-41ea-b7b2-2eab1b67300c</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MailSender.MailKit\MailSender.MailKit.csproj" />
+    <ProjectReference Include="..\TemplateMailSender.Core\TemplateMailSender.Core.csproj" />
   </ItemGroup>
 
 </Project>

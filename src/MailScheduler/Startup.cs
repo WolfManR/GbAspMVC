@@ -1,16 +1,29 @@
+using MailSender.MailKit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using TemplateMailSender.Core.MailSender;
 
 namespace MailScheduler
 {
 	public class Startup
 	{
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
-		{
+        {
+            var domainConfiguration = _configuration.GetSection("Domain");
+            services.Configure<EmailConfiguration>(domainConfiguration);
+            services.AddSingleton<IEmailService, EmailService>();
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
