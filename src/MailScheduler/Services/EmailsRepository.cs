@@ -20,5 +20,12 @@ namespace MailScheduler.Services
             email.Id = Guid.NewGuid();
             _emails.Add(email);
         }
+
+        public void UpdateSendStatus(Guid emailId, bool isSuccess)
+        {
+            if(_emails.FirstOrDefault(e => e.Id == emailId) is not { } email) return;
+
+            email.SendState = isSuccess ? SendStates.Send : SendStates.Fail;
+        }
     }
 }

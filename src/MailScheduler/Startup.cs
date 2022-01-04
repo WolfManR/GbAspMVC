@@ -1,3 +1,5 @@
+using System;
+using MailScheduler.Jobs;
 using MailScheduler.Services;
 using MailSender.MailKit;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Quartz;
 using TemplateMailSender.Core.MailSender;
 
 namespace MailScheduler
@@ -26,6 +29,22 @@ namespace MailScheduler
             services.Configure<EmailConfiguration>(domainConfiguration);
             services.AddSingleton<IEmailService, EmailService>();
             services.AddSingleton<EmailsRepository>();
+
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+
+                q.ScheduleJob<MailSendJob>(trigger => trigger
+                    .StartNow()
+                    .WithSimpleSchedule(builder => builder.RepeatForever().WithIntervalInMinutes(3))
+                );
+            });
+
+            services.AddQuartzHostedService(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>
