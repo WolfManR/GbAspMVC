@@ -27,5 +27,10 @@ namespace MailScheduler.Services
 
             email.SendState = isSuccess ? SendStates.Send : SendStates.Fail;
         }
+
+        public IReadOnlyCollection<Email> UserMails(string userId)
+        {
+            return _emails.Where(email => string.Equals(email.UserId, userId, StringComparison.InvariantCulture)).ToList();
+        }
     }
 }
