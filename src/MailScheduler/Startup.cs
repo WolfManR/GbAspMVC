@@ -1,3 +1,4 @@
+using MailScheduler.Services;
 using MailSender.MailKit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,6 +25,7 @@ namespace MailScheduler
             var domainConfiguration = _configuration.GetSection("Domain");
             services.Configure<EmailConfiguration>(domainConfiguration);
             services.AddSingleton<IEmailService, EmailService>();
+            services.AddSingleton<EmailsRepository>();
 
 			services.AddControllers();
 			services.AddSwaggerGen(c =>

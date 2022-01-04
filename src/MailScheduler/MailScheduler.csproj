@@ -14,4 +14,9 @@
     <ProjectReference Include="..\TemplateMailSender.Core\TemplateMailSender.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
