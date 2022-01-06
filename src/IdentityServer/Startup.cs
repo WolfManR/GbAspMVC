@@ -1,11 +1,6 @@
-using System;
-using System.Linq;
-using System.Text;
-
 using IdentityServer.DAL;
-using IdentityServer.Models;
 using IdentityServer.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -13,16 +8,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
+
+using System.Linq;
+
+using TemplateMailSender.Core;
 
 namespace IdentityServer
 {
     public class Startup
     {
-        private const string AuthPolicy = "AuthPolicy";
-
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
@@ -32,24 +27,16 @@ namespace IdentityServer
         {
             ConfigureDatabase(services);
 
-            services.AddCors(x => x.AddPolicy(AuthPolicy, b => b
-                .SetIsOriginAllowed(_ => true)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()));
+            services.RegisterCors();
+            
+            services.ConfigureAuthentication(Configuration);
 
-            var jwtSection = Configuration.GetSection(nameof(JwtSettings));
-            services.Configure<JwtSettings>(jwtSection);
-            var jwtSettings = jwtSection.Get<JwtSettings>();
-            
-            ConfigureAuthentication(services, jwtSettings);
-            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityServer", Version = "v1" });
 
-                ConfigureSwaggerAuthentication(c);
+                c.ConfigureSwaggerAuthentication();
             });
 
             services.AddScoped<AuthenticationService>();
@@ -76,7 +63,7 @@ namespace IdentityServer
 
             app.UseRouting();
 
-            app.UseCors(AuthPolicy);
+            app.UseCors(JwtSettings.AuthPolicy);
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -97,59 +84,6 @@ namespace IdentityServer
                 })
                 .AddEntityFrameworkStores<AuthorizationContext>()
                 .AddDefaultTokenProviders();
-        }
-
-        private static void ConfigureAuthentication(IServiceCollection services, JwtSettings jwtSettings)
-        {
-            var secureCode = Encoding.ASCII.GetBytes(jwtSettings.SecureCode);
-
-            services
-                .AddAuthentication(opt =>
-                {
-                    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(x => {
-                    x.RequireHttpsMetadata = false;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(secureCode),
-                        ValidateAudience = true,
-                        ValidateIssuer = true,
-                        ValidAudience = jwtSettings.ValidAudience,
-                        ValidIssuer = jwtSettings.ValidIssuer,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
-        }
-
-        private static void ConfigureSwaggerAuthentication(SwaggerGenOptions swaggerGenOptions)
-        {
-            swaggerGenOptions.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer 12345abcdef')",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            swaggerGenOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
         }
     }
 }
