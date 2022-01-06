@@ -4,7 +4,7 @@ using System.Text;
 
 using IdentityServer.DAL;
 using IdentityServer.Models;
-
+using IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -51,6 +51,8 @@ namespace IdentityServer
 
                 ConfigureSwaggerAuthentication(c);
             });
+
+            services.AddScoped<AuthenticationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
