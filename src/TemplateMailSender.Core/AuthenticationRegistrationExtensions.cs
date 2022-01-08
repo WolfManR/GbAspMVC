@@ -43,7 +43,7 @@ namespace TemplateMailSender.Core
                         IssuerSigningKey = new SymmetricSecurityKey(secureCode),
                         ValidateAudience = true,
                         ValidateIssuer = true,
-                        ValidAudience = jwtSettings.ValidAudience,
+                        ValidAudiences = jwtSettings.ValidAudience.Split(';', StringSplitOptions.TrimEntries),
                         ValidIssuer = jwtSettings.ValidIssuer,
                         ClockSkew = TimeSpan.Zero
                     };

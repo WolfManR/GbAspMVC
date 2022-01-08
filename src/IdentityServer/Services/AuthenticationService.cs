@@ -1,4 +1,5 @@
-﻿using IdentityServer.DAL;
+﻿using System;
+using IdentityServer.DAL;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -62,6 +63,9 @@ namespace IdentityServer.Services
         private IEnumerable<Claim> PrepareUserClaims(string userId, IList<Claim> claims)
         {
             claims.Add(new Claim(JwtRegisteredClaimNames.NameId, userId));
+            var validAudiences = _jwtSettings.ValidAudience.Split(';', StringSplitOptions.TrimEntries);
+            foreach (var audience in validAudiences)
+                claims.Add(new Claim(JwtRegisteredClaimNames.Aud, audience));
             return claims;
         }
 
@@ -73,6 +77,7 @@ namespace IdentityServer.Services
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(userClaims),
+                Issuer = _jwtSettings.ValidIssuer,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
