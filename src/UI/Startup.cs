@@ -12,7 +12,7 @@ using RazorEngineCore;
 
 using TemplateMailSender.Core.MailSender;
 using TemplateMailSender.Core.TemplateBuilder;
-
+using UI.DataModels;
 using UI.Services;
 
 namespace UI
@@ -29,6 +29,8 @@ namespace UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var urls = Configuration.GetSection(nameof(Urls)).Get<Urls>();
+
             services.AddSingleton<IRazorEngine, RazorEngine>();
             services.AddSingleton<ITemplateBuilder, MailContentBuilder>();
             services.AddSingleton<IEmailService, EmailService>();
@@ -36,6 +38,8 @@ namespace UI
             services.AddSingleton<TemplatesRepository>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            services.AddAuthentication();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,11 +52,15 @@ namespace UI
             else
             {
                 app.UseExceptionHandler("/Error");
+                app.UseHsts();
             }
 
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
