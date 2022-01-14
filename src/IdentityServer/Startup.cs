@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 using System.Linq;
-
+using System.Threading.Tasks;
 using TemplateMailSender.Core;
 
 namespace IdentityServer
@@ -43,15 +43,12 @@ namespace IdentityServer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public  void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 using var dbContext = scope.ServiceProvider.GetRequiredService<AuthorizationContext>();
-                if (dbContext.Database.GetPendingMigrations().Any())
-                {
-                    dbContext.Database.Migrate();
-                }
+                dbContext.Database.Migrate();
             }
 
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();

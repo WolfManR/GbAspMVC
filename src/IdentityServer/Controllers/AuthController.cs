@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Threading.Tasks;
+using IdentityServer.Models;
 
 namespace IdentityServer.Controllers
 {
@@ -20,9 +21,9 @@ namespace IdentityServer.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromQuery] string user, string password)
+        public async Task<IActionResult> Authenticate([FromBody]Credentials credentials)
         {
-            string token = await _authenticationService.Authenticate(user, password);
+            string token = await _authenticationService.Authenticate(credentials.Login, credentials.Password);
             if (token is null)
             {
                 return BadRequest(new { message = "Username or password is incorrect" });
@@ -32,9 +33,9 @@ namespace IdentityServer.Controllers
 
         [AllowAnonymous]
         [HttpPost("registeruser")]
-        public async Task<IActionResult> RegisterUser([FromQuery] string user, string password)
+        public async Task<IActionResult> RegisterUser([FromBody] Credentials credentials)
         {
-            var succeed = await _authenticationService.RegisterUser(user, password);
+            var succeed = await _authenticationService.RegisterUser(credentials.Login, credentials.Password);
             return succeed ? Ok() : BadRequest();
         }
     }
