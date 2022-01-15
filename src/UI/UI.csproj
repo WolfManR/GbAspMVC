@@ -11,10 +11,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.12" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DataModels\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MailSender.MailKit\MailSender.MailKit.csproj" />
