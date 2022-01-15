@@ -1,25 +1,107 @@
 ﻿@page "/Send" 
 @using TemplateMailSender.Core.MailSender
+@using UI.Services
+@inject EmailSendService _emailSendService
 
 <div>
-	<EditForm Model="EmailMessage">
-		<InputText @bind-Value="EmailMessage.Subject" DisplayName="Subject"/>
-		<InputTextArea @bind-Value="EmailMessage.Content"/>
+	<div>
+		<EditForm Model="ToContactInfo">
+			<InputText @bind-Value="ToContactInfo.Name" DisplayName="Name"/>
+			<InputText @bind-Value="ToContactInfo.Address" DisplayName="Address"/>
+			<button @onclick="AddToContactInfoToSendToList">Add</button>
+		</EditForm>
+	
+		<div>
+			@foreach (var address in SendToList)
+			{
+				<div>
+					<p>@address.Address</p>
+					<p>@address.Name</p>
+				</div>
+			}
+		</div>
+	</div>
+
+	<div>
+		<EditForm Model="FromContactInfo">
+			<InputText @bind-Value="FromContactInfo.Name" DisplayName="Name"/>
+			<InputText @bind-Value="FromContactInfo.Address" DisplayName="Address"/>
+			<button @onclick="AddFromContactInfoToSendFromList">Add</button>
+		</EditForm>
+	
+		<div>
+			@foreach (var address in SendFromList)
+			{
+				<div>
+					<p>@address.Address</p>
+					<p>@address.Name</p>
+				</div>
+			}
+		</div>
+	</div>
+
+	<EditForm Model="SendForm">
+		<InputText @bind-Value="SendForm.Subject" DisplayName="Subject"/>
+		<InputTextArea @bind-Value="SendForm.Content" DisplayName="Letter"/>
+		<InputDate @bind-Value="SendForm.ScheduleDate" DisplayName="Schedule date"/>
 		<button @onclick="SendMail">Send</button>
 		<button @onclick="ScheduleSend">Schedule Send</button>
 	</EditForm>
 </div>
 
-
 @code {
-	public EmailMessage EmailMessage { get; set; }
+	private EmailSendForm SendForm { get; set; } = new();
+	public List<EmailAddress> SendToList { get; set; } = new List<EmailAddress>();
+	public List<EmailAddress> SendFromList { get; set; } = new List<EmailAddress>();
+	public EmailAddress ToContactInfo { get; set; }
+	public EmailAddress FromContactInfo { get; set; }
 
-	private void SendMail()
+	private async Task SendMail()
 	{
+		SendForm.CopyData(out var email, out _);
+		email.ToAddresses = SendToList.ToList();
+		email.FromAddresses = SendFromList.ToList();
+
+		await _emailSendService.SendImmediately(email);
 	}
 
-	private void ScheduleSend()
+	private async Task ScheduleSend()
 	{
+		SendForm.CopyData(out var email, out var scheduleDate);
+		email.ToAddresses = SendToList.ToList();
+		email.FromAddresses = SendFromList.ToList();
+
+		await _emailSendService.ScheduleSend(email, scheduleDate);
 	}
 
+	private void AddToContactInfoToSendToList()
+	{
+		SendToList.Add(new EmailAddress(){Name = ToContactInfo.Name, Address = ToContactInfo.Address});
+		ToContactInfo.Name = null;
+		ToContactInfo.Address = null;
+	}
+
+	private void AddFromContactInfoToSendFromList()
+	{
+		SendFromList.Add(new EmailAddress(){Name = FromContactInfo.Name, Address = FromContactInfo.Address});
+		FromContactInfo.Name = null;
+		FromContactInfo.Address = null;
+	}
+
+	public sealed class EmailSendForm
+	{
+		public string Subject { get; set; }
+		public string Content { get; set; }
+		public DateTime ScheduleDate { get; set; }
+
+		public void CopyData(out EmailMessage message, out DateTime scheduleDate)
+		{
+			message = new EmailMessage()
+			{
+				Subject = Subject,
+				Content = Content,
+			};
+			scheduleDate = ScheduleDate;
+		}
+	}
 }
