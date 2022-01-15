@@ -1,63 +1,79 @@
-﻿@page "/"
+﻿@page "/Index"
 @using UI.DataModels
 @using UI.Pages.Templates
 @using UI.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject TemplatesRepository _templatesRepository
+@inject ProtectedLocalStorage _protectedLocalStorage
+@inject AuthenticationService _authenticationService
 
 <div>
-	<ul>
-		<li><button @onclick="()=>OpenRecordEditor()">Create</button></li>
-		<li><a href=""></a></li>
-		<li><a href=""></a></li>
-	</ul>
-
-	@if (IsTemplatesVisible)
+	@if (!IsAuthenticated)
 	{
-		<table>
-			<thead>
-			<tr>
-				<th>Name</th>
-				<th>RawTemplate</th>
-				<th></th>
-			</tr>
-			</thead>
-			<tbody>
-			@foreach (TemplateRecord template in Templates)
-			{
-				<tr>
-					<td>@template.Name</td>
-					<td>@template.RawTemplate</td>
-					<td>
-						<button @onclick="() => OpenRecordEditor(template.Name, template.RawTemplate)">Edit</button>
-						<button @onclick="() => DeleteRecord(template.Name)">Delete</button>
-					</td>
-				</tr>
-			}
-			</tbody>
-		</table>
+		<p>You must login to get access to service</p>
 	}
-	
-	@if (IsTemplateEditorVisible)
+	else
 	{
-		<TemplateEditor Template="@TemplateRecordOnEdit"
-		                OnCreateDone="HandleTemplateCreate"
-		                OnEditDone="HandleTemplateEdit">
+		<ul>
+			<li><button @onclick="()=>OpenRecordEditor()">Create</button></li>
+			<li><a href=""></a></li>
+			<li><a href=""></a></li>
+		</ul>
 
-		</TemplateEditor>
+		@if (IsTemplatesVisible)
+		{
+			<table>
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>RawTemplate</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				@foreach (TemplateRecord template in Templates)
+				{
+					<tr>
+						<td>@template.Name</td>
+						<td>@template.RawTemplate</td>
+						<td>
+							<button @onclick="() => OpenRecordEditor(template.Name, template.RawTemplate)">Edit</button>
+							<button @onclick="() => DeleteRecord(template.Name)">Delete</button>
+						</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		}
+	
+		@if (IsTemplateEditorVisible)
+		{
+			<TemplateEditor Template="@TemplateRecordOnEdit"
+			                OnCreateDone="HandleTemplateCreate"
+			                OnEditDone="HandleTemplateEdit">
+
+			</TemplateEditor>
+		}
 	}
 </div>
 
 @code {
-	public ICollection<TemplateRecord> Templates { get; set; }
+	[CascadingParameter]
+	private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
+	private ICollection<TemplateRecord> Templates { get; set; }
+
+	private bool IsAuthenticated { get; set; }
 	private bool IsTemplatesVisible { get; set; }
 	private bool IsTemplateEditorVisible { get; set; }
 
 	private TemplateRecord TemplateRecordOnEdit { get; set; } = new();
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
-		base.OnInitialized();
+		var authState = await AuthenticationStateTask;
+
+		if (authState.User.Identity?.IsAuthenticated is true) IsAuthenticated = true;
 
 		Templates = _templatesRepository.Get().ToList();
 		IsTemplatesVisible = true;
