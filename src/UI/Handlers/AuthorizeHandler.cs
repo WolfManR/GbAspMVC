@@ -10,12 +10,12 @@ namespace UI.Handlers
 {
     public class AuthorizeHandler : DelegatingHandler
     {
-        private readonly ProtectedBrowserStorage _protectedBrowserStorage;
+        private readonly ProtectedLocalStorage _protectedLocalStorage;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-        public AuthorizeHandler(ProtectedBrowserStorage protectedBrowserStorage, AuthenticationStateProvider authenticationStateProvider)
+        public AuthorizeHandler(ProtectedLocalStorage protectedLocalStorage, AuthenticationStateProvider authenticationStateProvider)
         {
-            _protectedBrowserStorage = protectedBrowserStorage;
+            _protectedLocalStorage = protectedLocalStorage;
             _authenticationStateProvider = authenticationStateProvider;
         }
 
@@ -27,7 +27,7 @@ namespace UI.Handlers
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
 
-            var token = await _protectedBrowserStorage.GetAsync<string>("accessToken");
+            var token = await _protectedLocalStorage.GetAsync<string>("accessToken");
             if(!token.Success) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
 
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
