@@ -7,7 +7,7 @@ namespace UI.Services
 {
     internal abstract class BaseHttpClientService
     {
-        private readonly HttpClient _client;
+        protected readonly HttpClient _client;
         private readonly ILogger<BaseHttpClientService> _logger;
 
         protected BaseHttpClientService(HttpClient client, ILogger<BaseHttpClientService> logger)
