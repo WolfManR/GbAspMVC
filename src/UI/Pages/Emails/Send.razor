@@ -1,7 +1,9 @@
 ﻿@page "/send"
 @using TemplateMailSender.Core.MailSender
 @using UI.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject EmailSendService _emailSendService
+@inject ProtectedLocalStorage _protectedLocalStorage
 
 <div class="mt-2 mb-5 col-md-12">
 	<EditForm Model="SendForm">
@@ -34,6 +36,13 @@
 	public List<EmailAddress> SendToList { get; set; } = new List<EmailAddress>();
 	public List<EmailAddress> SendFromList { get; set; } = new List<EmailAddress>();
 
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if(!firstRender) return;
+		var token = await GetToken();
+		_emailSendService.SetToken(token);
+	}
+
 	private async Task SendMail()
 	{
 		SendForm.CopyData(out var email, out _);
@@ -50,6 +59,12 @@
 		email.FromAddresses = SendFromList.ToList();
 
 		await _emailSendService.ScheduleSend(email, scheduleDate);
+	}
+
+	private async Task<string> GetToken()
+	{
+		var token = await _protectedLocalStorage.GetAsync<string>("accessToken");
+		return token.Value;
 	}
 
 	public sealed class EmailSendForm
