@@ -78,7 +78,8 @@ namespace IdentityServer.Services
             {
                 Subject = new ClaimsIdentity(userClaims),
                 Issuer = _jwtSettings.ValidIssuer,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Expires = DateTime.Now.AddYears(2)
             };
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
