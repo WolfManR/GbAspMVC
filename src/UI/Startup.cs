@@ -1,4 +1,3 @@
-using System;
 using MailSender.MailKit;
 
 using MailTemplates.Razor;
@@ -12,10 +11,12 @@ using Microsoft.Extensions.Hosting;
 
 using RazorEngineCore;
 
+using System;
+
 using TemplateMailSender.Core.MailSender;
 using TemplateMailSender.Core.TemplateBuilder;
+
 using UI.DataModels;
-using UI.Handlers;
 using UI.Services;
 
 namespace UI
@@ -43,9 +44,8 @@ namespace UI
             services.AddScoped<WebApiAuthenticationStateProvider>();
             services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<WebApiAuthenticationStateProvider>());
 
-            services.AddTransient<AuthorizeHandler>();
             services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(urls.Identity));
-            services.AddHttpClient<EmailSendService>(client => client.BaseAddress = new Uri(urls.MailScheduler)).AddHttpMessageHandler<AuthorizeHandler>();
+            services.AddHttpClient<EmailSendService>(client => client.BaseAddress = new Uri(urls.MailScheduler));
 
             services.AddSingleton<IRazorEngine, RazorEngine>();
             services.AddSingleton<ITemplateBuilder, MailContentBuilder>();
