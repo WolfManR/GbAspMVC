@@ -65,14 +65,16 @@
 
 	private TemplateRecord TemplateRecordOnEdit { get; set; } = new();
 
-	protected override async Task OnInitializedAsync()
-	{
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
 		var authState = await AuthenticationStateTask;
 
 		if (authState.User.Identity?.IsAuthenticated is true) IsAuthenticated = true;
 
 		Templates = _templatesRepository.Get().ToList();
 		IsTemplatesVisible = true;
+
+		StateHasChanged();
 	}
 
 	private void OpenRecordEditor(string? name = null, string? rawTemplate = null)
