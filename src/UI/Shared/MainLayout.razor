@@ -1,0 +1,39 @@
+﻿@using UI.Services
+@inherits LayoutComponentBase
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _authenticationStateProvider
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+	    <div class="top-row px-4">
+		    <AuthorizeView>
+			    <Authorized>
+				    <a href="/" @onclick="Logout">Logout</a>
+			    </Authorized>
+			    <NotAuthorized>
+				    <a href="/">Login</a>
+			    </NotAuthorized>
+		    </AuthorizeView>
+
+		    <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+	    </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
+
+
+@code{
+
+	private async Task Logout()
+	{
+		await ((WebApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+		_navigationManager.NavigateTo("");
+	}
+}
