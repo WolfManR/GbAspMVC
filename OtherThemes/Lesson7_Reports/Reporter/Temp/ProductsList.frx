@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" TextQuality="Regular" ReportInfo.Name="Products List" ReportInfo.Author="Tarxos" ReportInfo.Description="Prototype" ReportInfo.Created="11/23/2021 15:05:57" ReportInfo.Modified="11/30/2021 02:15:50" ReportInfo.CreatorVersion="2021.4.0.0" PrintSettings.PageRange="PageNumbers" PrintSettings.PageNumbers="1" PrintSettings.Duplex="Simplex">
+  <Dictionary/>
+  <ReportPage Name="Page1" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle" Width="718.2" Height="28.35" CanGrow="true">
+      <TextObject Name="Text1" Width="718.2" Height="28.35" Text="Products" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 14pt, style=Bold"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="32.35" Width="718.2" Height="113.4" Border.Lines="All" Border.Color="Maroon" CanGrow="true">
+      <ContainerObject Name="Container1" Left="9.45" Top="47.25" Width="699.3" Height="66.15">
+        <TextObject Name="DateLabel" Top="28.35" Width="103.95" Height="18.9" Text="Date:" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+        <TextObject Name="Text12" Left="151.2" Width="189" Height="18.9" Text="[Products.ManufacturingPrice]" Font="Arial, 10pt"/>
+        <TextObject Name="Text11" Left="151.2" Top="28.35" Width="189" Height="18.9" Text="[Products.Date]" Format="Date" Format.Format="d" Font="Arial, 10pt"/>
+        <TextObject Name="Text15" Left="349.65" Width="103.95" Height="18.9" Text="Units Sold:" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+        <TextObject Name="Text16" Left="463.05" Width="189" Height="18.9" Text="[Products.UnitsSold]" Font="Arial, 10pt"/>
+        <TextObject Name="DiscountBandLabel" Width="151.2" Height="18.9" Text="Manufacturing price:" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+      </ContainerObject>
+      <ContainerObject Name="Container2" Width="718.2" Height="37.8" Fill="LinearGradient" Fill.StartColor="Brown" Fill.EndColor="Gainsboro" Fill.Angle="60" Fill.Focus="1" Fill.Contrast="0.65">
+        <TextObject Name="Text13" Width="302.4" Height="37.8" Dock="Left" Text="[Products.Product]" VertAlign="Center" Font="Arial, 10pt, style=Bold" TextFill.Color="White"/>
+        <TextObject Name="Text14" Left="302.4" Width="415.8" Height="37.8" Dock="Fill" Anchor="Right" Text="[Products.Segment]&#13;&#10;[Products.Country]" VertAlign="Center" RightToLeft="true" Font="Arial, 10pt" TextFill.Color="White"/>
+      </ContainerObject>
+    </DataBand>
+    <PageFooterBand Name="PageFooter" Top="149.75" Width="718.2" Height="28.35" Fill.Color="WhiteSmoke" CanGrow="true">
+      <TextObject Name="Text10" Left="614.25" Width="94.5" Height="28.35" Text="[PageN]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 8pt"/>
+    </PageFooterBand>
+  </ReportPage>
+</Report>
